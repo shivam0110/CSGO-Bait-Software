@@ -3,10 +3,12 @@ Hi! :)
 Read this document if you want to understand how everything works.
 
 Disclaimer:
-This project is written in C#. The main reason for me to share the source code is to serve
-as evidence that my videos are not faked. If you have come here to learn programming this
-is not a good place to start and you should google real tutorials instead. This project
-is poorly documented, poorly written with a lot of hacky solutions or copy pasted snippets.
+This project is written in C# and is 100% external without memory writing. 
+The main reason for me to share the source code is to serve as evidence 
+that my videos are not faked. If you have come here to learn programming 
+this is not a good place to start and you should google real tutorials 
+instead. This project is poorly documented, poorly written with a lot of 
+hacky solutions or copy pasted snippets.
 
 MemoryReading
 This project reads the memory to get information from the game. 
@@ -19,7 +21,7 @@ This project _do not_ rely on memory writing at all. There was simply no need
 to write memory to accomplish what was needed for the purpose of this bait software.
 
 How do I send console commands without writing memory?
-This is a hacky but gets the job done: In csgo you can bind keys to execute console commands from
+This is a bit hacky but gets the job done: In csgo you can bind keys to execute console commands from
 cfg files stored in the csgo directory. The fake cheat manipulates the cheaters config file
 and adds a keybinding to execute a cfg file called cheater.cfg. Whatever console command I want
 to send I just write it to that file then programatically simulate pressing the key bound to 
