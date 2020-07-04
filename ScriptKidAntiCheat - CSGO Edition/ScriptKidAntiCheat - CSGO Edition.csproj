@@ -93,7 +93,7 @@
       <HintPath>..\packages\Costura.Fody.4.1.0\lib\net40\Costura.dll</HintPath>
     </Reference>
     <Reference Include="Gma.System.MouseKeyHook">
-      <HintPath>..\Packages\Gma.System.MouseKeyHook\Gma.System.MouseKeyHook.dll</HintPath>
+      <HintPath>..\Gma.System.MouseKeyHook\Gma.System.MouseKeyHook.dll</HintPath>
     </Reference>
     <Reference Include="Google.Apis, Version=1.45.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.1.45.0\lib\net45\Google.Apis.dll</HintPath>
