@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 
@@ -9,7 +9,7 @@ namespace ScriptKidAntiCheat.Utils
      */
     public static class Offsets
     {
-        public const string OffsetsURL = "https://gitlab.com/sheetergang/csgo-memory-offsets/-/raw/master/offsets.txt";
+        public const string OffsetsURL = "https://gitlab.com/csgocheats/csgo-memory-offsets/-/raw/master/offsets.txt";
 
         public const int MAXSTUDIOBONES = 128; // total bones actually used
         public const float weapon_recoil_scale = 2.0f;
