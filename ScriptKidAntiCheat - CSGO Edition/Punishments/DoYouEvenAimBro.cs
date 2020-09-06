@@ -1,4 +1,4 @@
-﻿namespace ScriptKidAntiCheat.Punishments
+namespace ScriptKidAntiCheat.Punishments
 {
     class DoYouEvenAimBro : Punishment
     {

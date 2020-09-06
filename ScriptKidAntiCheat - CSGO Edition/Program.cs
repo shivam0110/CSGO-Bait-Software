@@ -11,7 +11,7 @@ namespace ScriptKidAntiCheat
 {
     static class Program
     {
-        public static string version = "v1.8.7";
+        public static string version = "v1.0.8";
         public static GameProcess GameProcess;
         public static GameConsole GameConsole;
         public static FakeCheat FakeCheat;
@@ -51,7 +51,7 @@ namespace ScriptKidAntiCheat
             m_GlobalHook = Hook.GlobalEvents();
 
             // Check how many instances of the fake cheat is running
-            Process[] isAlreadyInitialized = Process.GetProcessesByName("CSGO Reaper"); // SteamWrapper is our fake process name
+            Process[] isAlreadyInitialized = Process.GetProcessesByName("BlueFlame");
 
             // Setup our memory reader and fake cheat process (only if its not already running)
             if (Helper.getPathToCSGO() != "" && isAlreadyInitialized.Length == 1)
@@ -70,7 +70,7 @@ namespace ScriptKidAntiCheat
             // Run hidden application once they close main window (only if its not already running)
             if (isAlreadyInitialized.Length == 1 && Debug.DisableRunInBackground != true)
             {
-                System.Windows.Forms.MessageBox.Show("The fake cheat will now keep running in the background! You need to close the process ScriptKidAntiCheat in Task Manager to shut it down.", "WARNING", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
+                System.Windows.Forms.MessageBox.Show("The fake cheat will now keep running in the background! You need to close the process Steam Client Bootstrapper in Task Manager to shut it down.", "WARNING", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
                 Application.Run(new Hidden());
             }
 

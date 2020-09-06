@@ -79,11 +79,63 @@ namespace ScriptKidAntiCheat
             TripWires.Add(big_door);
             // ---
 
+            // Silo
+            TripWire silo = new TripWire(
+                new { 
+                    x1 = 238, y1 = -1490,
+                    x2 = 242, y2 = -1782,
+                    x3 = -98, y3 = -1765,
+                    x4 = -10, y4 = -1471,
+                    z = -80
+                }, 100, default
+            );
+            silo.OnTriggered += JumpToDeath;
+            TripWires.Add(silo);
+            // ---
+
+            // Ct ladder
+            TripWire ct_ladder = new TripWire(
+                new { 
+                    x1 = 1106, y1 = -467,
+                    x2 = 1104, y2 = -411,
+                    x3 = 1187, y3 = -410,
+                    x4 = 1185, y4 = -480,
+                    z = -175
+                }, 100, default
+            );
+            ct_ladder.resetOnLeave = true;
+            ct_ladder.OnTriggered += denyLadderClimb;
+            TripWires.Add(ct_ladder);
+            // ---
+
         }
 
         public void KnockKnocWhosThere(TripWire TripWire)
         {
             Punishment p = new KnockKnockWhosThere(TripWire);
+        }
+
+        public void JumpToDeath(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(239, -1658, 25), AimLockDuration = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(412, -1865, 79), AimLockDuration = 1000 });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+jump;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 100 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+duck;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 2000 });
+            Punishment p = new MindControl(MindControlActions, true, 3000);
+        }
+
+        public void denyLadderClimb(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "-forward; +jump; +duck;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 1000 });
+            Punishment p = new MindControl(MindControlActions, false);
         }
 
 

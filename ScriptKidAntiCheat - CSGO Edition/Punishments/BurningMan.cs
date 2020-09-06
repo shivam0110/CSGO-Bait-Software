@@ -11,6 +11,8 @@ namespace ScriptKidAntiCheat.Punishments
     {
         public bool IsThrowing = false;
 
+        public string TypeOfNade = "";
+
         public override int ActivateOnRound { get; set; } = 5;
 
         public BurningMan() : base(0) // 0 = Always active
@@ -33,6 +35,15 @@ namespace ScriptKidAntiCheat.Punishments
                     // If player is throwing nade, molotov or incendiary
                     if(ActiveWeapon == Weapons.Molotov || ActiveWeapon == Weapons.Incendiary || ActiveWeapon == Weapons.Grenade)
                     {
+
+                        if(ActiveWeapon == Weapons.Grenade)
+                        {
+                            TypeOfNade = "HE";
+                        } else
+                        {
+                            TypeOfNade = "MO";
+                        }
+
                         ActivatePunishment();
                     }
                 }
@@ -57,9 +68,6 @@ namespace ScriptKidAntiCheat.Punishments
                 // Look down
                 SendInput.MouseMove(0, 10000);
 
-                //Thread.Sleep(50); // wait 75ms
-                //SendInput.MouseMove(0, -5000);
-
                 Program.GameConsole.SendCommand("-forward; -back; -moveleft; -moveright; unbind W; unbind A; unbind S; unbind D");
 
                 Thread.Sleep(2000); // unbind for 2 seconds :D
@@ -69,7 +77,7 @@ namespace ScriptKidAntiCheat.Punishments
                 IsThrowing = false;
             });
 
-            base.AfterActivate();
+            base.AfterActivate(true, this.GetType().Name + "(" + TypeOfNade + ")");
         }
 
     }

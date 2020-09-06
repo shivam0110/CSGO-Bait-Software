@@ -21,6 +21,20 @@ namespace ScriptKidAntiCheat
         {
 
             // A Short / House
+            TripWire mindcontrol = new TripWire(
+                new { 
+                    x1 = 941, y1 = 2221,
+                    x2 = 935, y2 = 2190,
+                    x3 = 894, y3 = 2190,
+                    x4 = 894, y4 = 2221,
+                    z = 0
+                }, 100, Team.Terrorists
+            );
+            mindcontrol.OnTriggered += mindcontrolPunishment;
+            TripWires.Add(mindcontrol);
+            // ---
+
+            // A Short / House
             TripWire a_short = new TripWire(
                 new { 
                     x1 = 1928, y1 = 178,
@@ -67,17 +81,37 @@ namespace ScriptKidAntiCheat
 
         public void DropThatGun(TripWire TripWire)
         {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(1750, -447, 363), AimLockDuration = 500 });
+            MindControlActions.Add(new MindControlAction { Sleep = 100 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            
             Vector3 AimDirection = Program.GameData.Player.AimDirection;
             if(AimDirection.X < 0)
             {
-                // Coming from CT side
-                Punishment p = new Yeeeeeeeet(TripWire, -5000, -1000, 5000, 1000);
-            } else
-            {
-                // Coming from T side
-                Punishment p = new Yeeeeeeeet(TripWire, 5000, -1000, -5000, 1000);
+                // Coming from T side (look back in correct direction after throwing weapons)
+                MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(1429, -321, 320), AimLockDuration = 500 });
             }
-            
+            else
+            {
+                // Coming from CT side (look back in correct direction after throwing weapons)
+                MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(1910, -325, 320), AimLockDuration = 500 });
+            }
+
+            Punishment p = new MindControl(MindControlActions);
+        }
+
+        public void mindcontrolPunishment(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(691, 2220, 201), AimLockDuration = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward; drop; drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(767, 2981, 198), AimLockDuration = 3000 });
+            MindControlActions.Add(new MindControlAction { Sleep = 3000 });
+            Punishment p = new MindControl(MindControlActions, true, 3000);
         }
 
 

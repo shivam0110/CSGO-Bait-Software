@@ -12,7 +12,7 @@ using ScriptKidAntiCheat.Utils;
 
 namespace ScriptKidAntiCheat
 {
-    class GoogleDriveUploader
+    public class GoogleDriveUploader
     {
         // If modifying these scopes, remember to generate new token
         static string[] Scopes = { DriveService.Scope.DriveFile };

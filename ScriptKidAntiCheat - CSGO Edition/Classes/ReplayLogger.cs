@@ -11,10 +11,13 @@ namespace ScriptKidAntiCheat
     public static class ReplayLogger
     {
 
+        public static string lastEntry = "";
+
         public static void Log(string Message, bool PrependScoreAndRoundTime = true, string RecordingName = "")
         {
             string LogFile = "";
             string demoFile = "";
+            string logEntry = "";
 
             try
             {
@@ -44,14 +47,18 @@ namespace ScriptKidAntiCheat
                         float TickRate = 1.0f / Program.GameData.MatchInfo.GlobalVars.interval_per_tick;
                         long CurrentTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
                         float CurrentTick = (CurrentTime - Program.FakeCheat.ActiveMapClass.RecordingStarted) * TickRate;
-                        CurrentTick = CurrentTick - (TickRate*5); // Make sure our tick count in the log is 5 seconds before the actual event
+                        CurrentTick = CurrentTick - (TickRate * 5); // Make sure our tick count in the log is 5 seconds before the actual event
 
-                        sw.WriteLine(
-                            "ROUND: " + $"{Program.GameData.MatchInfo.RoundNumber:D2}" + 
-                            " | TIME: " + Program.GameData.MatchInfo.RoundTime +
-                            " | TICK: " + CurrentTick +
-                            " | EVENT: " + Message
-                        );
+                        logEntry = "ROUND: " + $"{Program.GameData.MatchInfo.RoundNumber:D2}" +
+                                    " | TIME: " + Program.GameData.MatchInfo.RoundTime +
+                                    " | TICK: " + CurrentTick +
+                                    " | EVENT: " + Message;
+
+                        if (logEntry != lastEntry)
+                        {
+                            lastEntry = logEntry;
+                            sw.WriteLine(logEntry);
+                        }
 
                         if (!File.Exists(demoFile))
                         {

@@ -9,6 +9,7 @@ using ScriptKidAntiCheat.Punishments;
 using ScriptKidAntiCheat.Internal;
 using ScriptKidAntiCheat.Data;
 using System.Threading;
+using SharpDX;
 
 namespace ScriptKidAntiCheat
 {
@@ -31,7 +32,8 @@ namespace ScriptKidAntiCheat
                         z = 0
                     }, 100, Team.Terrorists
                 );
-                t_spawn.OnTriggered += tripWirePunishments;
+                t_spawn.resetOnLeave = false;
+                t_spawn.OnTriggered += debugging_tripwire;
                 TripWires.Add(t_spawn);
                 // ---
             }
@@ -111,12 +113,12 @@ namespace ScriptKidAntiCheat
             TripWire black_magic_window = new TripWire(
                 new
                 {
-                    x1 = -1098, y1 = -539,
-                    x2 = -1097, y2 = -763,
-                    x3 = -1073, y3 = -758,
-                    x4 = -1067, y4 = -520,
+                    x1 = -1101, y1 = -536,
+                    x2 = -1100, y2 = -718,
+                    x3 = -1050, y3 = -715,
+                    x4 = -1052, y4 = -524,
                     z = -143
-                }, 100, default, 50
+                }, 50, default, 25
             );
             black_magic_window.checkFromMemory = true;
             black_magic_window.OnTriggered += DropWeaponsBehindMe;
@@ -138,19 +140,54 @@ namespace ScriptKidAntiCheat
             TripWires.Add(a_palace);
             // ---
 
+            // Window B House
+            TripWire window_b_house = new TripWire(
+                new
+                {
+                    x1 = -1187, y1 = 791,
+                    x2 = -1186, y2 = 664,
+                    x3 = -1294, y3 = 664,
+                    x4 = -1290, y4 = 807,
+                    z = 0
+                }, 100, default
+            );
+            window_b_house.OnTriggered += ByeByeGuns;
+            TripWires.Add(window_b_house);
+            // ---
+
         }
 
         public void DropWeaponsBehindMe(TripWire TripWire)
         {
-           
-            Punishment p = new Yeeeeeeeet(TripWire, -8000, -500, 10000, 0);
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-1255, -623, -100), AimLockDuration = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 50 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+back;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            Punishment p = new MindControl(MindControlActions);
         }
 
         public void debugging_tripwire(TripWire TripWire)
         {
-           // Console.WriteLine("yeet");
-          //  Punishment p = new ViolenceSpeedMomentum();
+            Punishment p = new ReverseSpeedhack();
+            //Punishment p = new DrunkenMaster();
         }
+
+        public void ByeByeGuns(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-1233, 869, -39), AimLockDuration = 1500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward" });
+            MindControlActions.Add(new MindControlAction { Sleep = 1500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 125 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-1447, 735, 16), AimLockDuration = 100 });
+            Punishment p = new MindControl(MindControlActions, true, 2500);
+        }
+
 
     }
 }

@@ -11,6 +11,7 @@ namespace ScriptKidAntiCheat.Punishments
     {
         public bool FakePlantStarted = false;
         public bool FakeDefuseStarted = false;
+        public Weapons LastActiveWeapon;
         private static System.Timers.Timer FakePlantTimer;
         private static System.Timers.Timer FakeDefuseTimer;
 
@@ -34,6 +35,23 @@ namespace ScriptKidAntiCheat.Punishments
             try
             {
                 if (!Player.IsAlive()) return;
+
+                Weapons ActiveWeapon = (Weapons) Program.GameData.Player.ActiveWeapon;
+
+                if (LastActiveWeapon != ActiveWeapon)
+                {
+                    LastActiveWeapon = ActiveWeapon;
+
+                    if (ActiveWeapon == Weapons.C4)
+                    {
+                        Program.GameConsole.SendCommand("unbind g");
+                    }
+                    else
+                    {
+                        Program.GameConsole.SendCommand("bind g drop");
+                    }
+                }
+
 
                 if (Player.IsArmingBomb(GameProcess) == true)
                 {

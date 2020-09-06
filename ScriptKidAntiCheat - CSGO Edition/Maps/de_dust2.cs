@@ -9,6 +9,7 @@ using ScriptKidAntiCheat.Punishments;
 using ScriptKidAntiCheat.Internal;
 using ScriptKidAntiCheat.Data;
 using System.Threading;
+using SharpDX;
 
 namespace ScriptKidAntiCheat
 {
@@ -18,6 +19,34 @@ namespace ScriptKidAntiCheat
 
         public de_dust2()
         {
+
+            // CT SPAWN MID
+            TripWire ct_mid = new TripWire(
+                new { 
+                    x1 = -346, y1 = 2001,
+                    x2 = -349, y2 = 2303,
+                    x3 = -519, y3 = 2302,
+                    x4 = -517, y4 = 1965,
+                    z = 0
+                }, 100, Team.CounterTerrorists, 50
+            );
+            ct_mid.OnTriggered += RushMid;
+            TripWires.Add(ct_mid);
+            // ---
+
+            // B Window
+            TripWire b_window = new TripWire(
+                new { 
+                    x1 = -1410, y1 = 2629,
+                    x2 = -1408, y2 = 2726,
+                    x3 = -1362, y3 = 2721,
+                    x4 = -1366, y4 = 2627,
+                    z = 0
+                }, 50, default, 50
+            );
+            b_window.OnTriggered += ByeByeGuns;
+            TripWires.Add(b_window);
+            // ---
 
             // A LONG
             TripWire a_long = new TripWire(
@@ -75,9 +104,29 @@ namespace ScriptKidAntiCheat
             TripWires.Add(b_door);
             // ---
 
-            
         }
 
+        public void RushMid(TripWire TripWire)
+        {
+            if (Program.GameData.MatchInfo.RoundNumber < 3 && !Program.Debug.IgnoreActivateOnRound) return; 
+            Program.GameConsole.SendCommand("-forward");
+        }
+
+        public void ByeByeGuns(TripWire TripWire)
+        {
+            if (Program.GameData.MatchInfo.RoundNumber < 3 && !Program.Debug.IgnoreActivateOnRound) return;
+
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-1444, 2982, 334), AimLockDuration = 1100 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward" });
+            MindControlActions.Add(new MindControlAction { Sleep = 300 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop" });
+            MindControlActions.Add(new MindControlAction { Sleep = 100 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            Punishment p = new MindControl(MindControlActions, true);
+        }
 
     }
 }

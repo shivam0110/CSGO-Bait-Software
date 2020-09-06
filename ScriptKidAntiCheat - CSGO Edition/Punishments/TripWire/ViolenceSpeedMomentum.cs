@@ -9,7 +9,7 @@ namespace ScriptKidAntiCheat.Punishments
     class ViolenceSpeedMomentum : Punishment
     {
 
-        public ViolenceSpeedMomentum() : base(5000) // 0 = Always active
+        public ViolenceSpeedMomentum() : base(15000, true) // 0 = Always active
         {
             try
             {

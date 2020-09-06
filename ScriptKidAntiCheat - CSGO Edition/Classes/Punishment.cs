@@ -42,7 +42,7 @@ namespace ScriptKidAntiCheat.Punishments
                 GameData.MatchInfo.OnMatchNewRound += ResetOnMatchNewRound;
             }
 
-            if(resetTime != 0) 
+            if (resetTime != 0)
             {
                 ResetAfter(resetTime);
             }
@@ -54,20 +54,29 @@ namespace ScriptKidAntiCheat.Punishments
 
         virtual public void AfterActivate(bool logging = true, string overrideName = "")
         {
-            if(logging)
+            string PunishmentLogName = this.GetType().Name;
+
+            if (overrideName != "")
             {
-                ReplayLogger.Log(this.GetType().Name);
+                PunishmentLogName = overrideName;
+            }
+
+            if (logging)
+            {
+                ReplayLogger.Log(PunishmentLogName);
 
                 if (Program.Debug.ShowDebugMessages)
                 {
-                    Program.GameConsole.SendCommand("Say \"Punishment activated (" + this.GetType().Name + ")\"");
+                    Program.GameConsole.SendCommand("Say \"Punishment activated (" + PunishmentLogName + ")\"");
                 }
             }
+
+            Program.FakeCheat.ReplayMonitor.PunishmentCounter++;
         }
 
         virtual public bool CanActivate()
         {
-            if(Enabled == false)
+            if (Enabled == false)
             {
                 return false;
             }
@@ -77,7 +86,7 @@ namespace ScriptKidAntiCheat.Punishments
                 return false;
             }
 
-            if ((GameData.MatchInfo.RoundNumber < ActivateOnRound || GameData.MatchInfo.RoundNumber > DeactivateOnRound) && Program.Debug.IgnoreActivateOnRound == false )
+            if ((GameData.MatchInfo.RoundNumber < ActivateOnRound || GameData.MatchInfo.RoundNumber > DeactivateOnRound) && Program.Debug.IgnoreActivateOnRound == false)
             {
                 return false;
             }

@@ -27,7 +27,7 @@ namespace ScriptKidAntiCheat.Data
             GameProcess = gameProcess;
             Player = new Player();
             MatchInfo = new MatchInfo();
-            Entities = Enumerable.Range(0, 64).Select(index => new Entity(index)).ToArray();
+            Entities = Enumerable.Range(0, 1024).Select(index => new Entity(index)).ToArray();
         }
 
         public override void Dispose()

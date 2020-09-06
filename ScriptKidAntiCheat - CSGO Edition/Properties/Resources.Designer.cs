@@ -59,5 +59,23 @@ namespace ScriptKidAntiCheat.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream flashed {
+            get {
+                return ResourceManager.GetStream("flashed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream knock {
+            get {
+                return ResourceManager.GetStream("knock", resourceCulture);
+            }
+        }
     }
 }

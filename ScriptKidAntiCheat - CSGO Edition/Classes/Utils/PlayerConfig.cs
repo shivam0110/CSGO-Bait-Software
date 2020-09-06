@@ -17,7 +17,7 @@ namespace ScriptKidAntiCheat.Classes.Utils
 
         public static void ResetConfig()
         {
-            if(IsResetting == false)
+            if (IsResetting == false)
             {
                 IsResetting = true;
 

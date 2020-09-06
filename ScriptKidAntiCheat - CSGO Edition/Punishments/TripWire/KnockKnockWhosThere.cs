@@ -15,13 +15,17 @@ namespace ScriptKidAntiCheat.Punishments
     class KnockKnockWhosThere : Punishment
     {
         public TripWire triggeringTripWire;
+
+        public bool isPlaying = false;
+
         bool simulatedKeyDown = false;
+
         private IKeyboardMouseEvents m_GlobalHook;
 
         public KnockKnockWhosThere(TripWire TripWire) : base(0, false, 100) // 0 = Always active
         {
             triggeringTripWire = TripWire;
-            Program.GameConsole.SendCommand("bind e \"play physics/flesh/fist_hit_04.wav\"");
+            Program.GameConsole.SendCommand("unbind e");
             // Keyboard events
             Program.m_GlobalHook.KeyDown += GlobalHookKeyDown;
         }
@@ -58,6 +62,27 @@ namespace ScriptKidAntiCheat.Punishments
         public void ActivatePunishment()
         {
             if (base.CanActivate() == false) return;
+
+            if (!isPlaying)
+            {
+                isPlaying = true;
+
+                Task.Run(() => {
+
+                    Program.GameConsole.SendCommand("play knock");
+
+                    if (Helper.HasLocalSounds == false)
+                    {
+                        System.IO.Stream str = Properties.Resources.knock;
+                        System.Media.SoundPlayer snd = new System.Media.SoundPlayer(str);
+                        snd.Play();
+                    }
+
+                    Thread.Sleep(1000);
+                    isPlaying = false;
+                });
+
+            }
 
             base.AfterActivate();
         }

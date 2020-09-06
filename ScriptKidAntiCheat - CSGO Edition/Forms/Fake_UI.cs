@@ -33,27 +33,34 @@ namespace ScriptKidAntiCheat
             this.title.Location = this.Location; 
             this.title.Width = this.Width;
             this.title.Height = 30;
-            this.title.BackColor = Color.Black;
+            this.title.BackColor = Color.Transparent;
             this.Controls.Add(this.title);
             this.title.BringToFront();
-            this.close.Text = "Close";
-            this.close.Font = new System.Drawing.Font("Impact", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.close.Location = new Point(this.Width - 50, this.Location.Y + 3);
-            this.close.ForeColor = Color.White;
-            this.close.BackColor = Color.Black;
-            this.Controls.Add(this.close);
-            this.close.BringToFront();
 
-            this.close.MouseEnter += new EventHandler(Control_MouseEnter);
-            this.close.MouseLeave += new EventHandler(Control_MouseLeave);
-            this.close.MouseClick += new MouseEventHandler(Control_MouseClick);
+            this.pictureBox1.BringToFront();
+
+            this.pictureBox1.MouseEnter += new EventHandler(CloseBtn_MouseEnter);
+            this.pictureBox1.MouseLeave += new EventHandler(CloseBtn_MouseLeave);
+            this.pictureBox1.MouseClick += new MouseEventHandler(CloseBtn_MouseClick);
 
             // finally, wouldn't it be nice to get some moveability on this control?
             this.title.MouseDown += new MouseEventHandler(Title_MouseDown);
             this.title.MouseUp += new MouseEventHandler(Title_MouseUp);
             this.title.MouseMove += new MouseEventHandler(Title_MouseMove);
 
+            this.button1.MouseEnter += new EventHandler(InjectBtn_MouseEnter);
+            this.button1.MouseLeave += new EventHandler(InjectBtn_MouseLeave);
+
+            this.pictureBox3.MouseClick += new MouseEventHandler(FakeMenuClick);
+
             pictureBox2.BringToFront();
+
+            // Set last check vac detected to todays date :D
+            DateTime today = DateTime.Today;
+            label4.Text = label4.Text + " " + String.Format("{0:yyyy-MM-dd}", today);
+
+            // Set version number
+            label5.Text = label5.Text + " " + Program.version;
 
             // Quick buttons
             Program.m_GlobalHook.OnCombination(new Dictionary<Combination, Action>
@@ -74,23 +81,31 @@ namespace ScriptKidAntiCheat
 
         }
 
-        private void Control_MouseEnter(object sender, EventArgs e)
+        private void CloseBtn_MouseEnter(object sender, EventArgs e)
         {
-            if (sender.Equals(this.close))
-                this.close.ForeColor = Color.Red;
+                this.pictureBox1.BackColor = Color.LightBlue;
         }
 
-        private void Control_MouseLeave(object sender, EventArgs e)
-        { // return them to their default colours
-            if (sender.Equals(this.close))
-                this.close.ForeColor = Color.White;
+        private void CloseBtn_MouseLeave(object sender, EventArgs e)
+        {
+                this.pictureBox1.BackColor = Color.Transparent;
         }
 
-        private void Control_MouseClick(object sender, MouseEventArgs e)
+        private void CloseBtn_MouseClick(object sender, MouseEventArgs e)
         {
-            if (sender.Equals(this.close))
-                this.Close(); // close the form
+                this.Close();
         }
+
+        private void InjectBtn_MouseEnter(object sender, EventArgs e)
+        {
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(150)))), ((int)(((byte)(255)))));
+        }
+
+        private void InjectBtn_MouseLeave(object sender, EventArgs e)
+        {
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(115)))), ((int)(((byte)(255)))));
+        }
+
 
         void Title_MouseUp(object sender, MouseEventArgs e)
         {
@@ -145,6 +160,11 @@ namespace ScriptKidAntiCheat
             {
                 MessageBox.Show("CSGO is not running!", "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
+        }
+
+        private void FakeMenuClick(object sender, MouseEventArgs e)
+        {
+            MessageBox.Show("You need to inject dll first", "Not injected", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
         }
     }
 }

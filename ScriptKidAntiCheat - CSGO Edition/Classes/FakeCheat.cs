@@ -1,30 +1,31 @@
-﻿using Gma.System.MouseKeyHook;
-using ScriptKidAntiCheat.Classes.Utils;
-using ScriptKidAntiCheat.Data;
+﻿using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
-using SharpDX;
 using System;
 using System.Timers;
-using System.Windows.Forms;
 
 namespace ScriptKidAntiCheat.Classes
 {
     public class FakeCheat
     {
-        private static ReplayMonitor ReplayMonitor;
+        public ReplayMonitor ReplayMonitor;
         public Map ActiveMapClass { get; set; }
 
         public bool ConfigBackupCreated = false;
 
         private static System.Timers.Timer ticker;
+
         private static System.Timers.Timer ticker2;
+
         public bool InDemo = false;
+
+        public DateTime startTime;
+
+        public DateTime endTime;
 
         public int ClientState { get; set; } = -1; // Don't change this
 
         public FakeCheat()
         {
-
             MouseHook.Start();
 
             // Start replay monitor
@@ -50,7 +51,7 @@ namespace ScriptKidAntiCheat.Classes
 
         private void tick2(Object source, ElapsedEventArgs e)
         {
-            if(InDemo)
+            if (InDemo && Program.Debug.ShowDebugMessages)
             {
                 SendInput.KeyPress(KeyCode.KEY_0);
             }
@@ -58,7 +59,7 @@ namespace ScriptKidAntiCheat.Classes
 
         private void tick(Object source, ElapsedEventArgs e)
         {
-            if(Program.GameProcess.IsValidAndActiveWindow && ConfigBackupCreated == false)
+            if (Program.GameProcess.IsValidAndActiveWindow && ConfigBackupCreated == false)
             {
                 ConfigBackupCreated = true;
                 PlayerConfig.CreateBackup();
@@ -67,7 +68,33 @@ namespace ScriptKidAntiCheat.Classes
             // Check if memory reader is loaded
             if (Program.GameProcess.IsValid)
             {
-                
+
+                if (Helper.MouseIsCalibrated == false && Program.GameData.ClientState == 6)
+                {
+                    bool calibrateMouse = false;
+
+                    if (startTime == null)
+                    {
+                        calibrateMouse = true;
+                    }
+                    else
+                    {
+                        endTime = DateTime.Now;
+                        Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
+                        // Retry every 5 seconds
+                        if (elapsedMillisecs > 5000)
+                        {
+                            calibrateMouse = true;
+                        }
+                    }
+
+                    if (calibrateMouse)
+                    {
+                        startTime = DateTime.Now;
+                        Helper.CalibrateMouseSensitivity();
+                    }
+                }
+
                 if (Program.GameData.ClientState != ClientState)
                 {
                     ClientState = Program.GameData.ClientState;
@@ -82,7 +109,8 @@ namespace ScriptKidAntiCheat.Classes
                     if (ClientState == 6)
                     {
                         setupPunishmentsAndTripWires();
-                    } else
+                    }
+                    else
                     {
                         // Dispose ActiveMapClass
                         if (ActiveMapClass != null)
@@ -91,7 +119,7 @@ namespace ScriptKidAntiCheat.Classes
                             ActiveMapClass = null;
                         }
                     }
-                        
+
                 }
 
             }
@@ -112,28 +140,28 @@ namespace ScriptKidAntiCheat.Classes
                 return; // Not in matchmaking
             }
 
-            if(Program.GameData.ClientState != 6)
+            if (Program.GameData.ClientState != 6)
             {
                 return; // 6 = Connected and ingame
             }
 
             // Setup punishments & tripwires depending on what map is played
-            if(MemMapName.Contains("de_inferno"))
+            if (MemMapName.Contains("de_inferno"))
             {
                 Console.WriteLine("de_inferno");
                 ActiveMapClass = new de_inferno();
-            } 
-            else if(MemMapName.Contains("de_cache"))
+            }
+            else if (MemMapName.Contains("de_cache"))
             {
                 Console.WriteLine("de_cache");
                 ActiveMapClass = new de_cache();
-            } 
-            else if(MemMapName.Contains("de_dust2"))
+            }
+            else if (MemMapName.Contains("de_dust2"))
             {
                 Console.WriteLine("de_dust2");
                 ActiveMapClass = new de_dust2();
-            } 
-            else if(MemMapName.Contains("de_mirage"))
+            }
+            else if (MemMapName.Contains("de_mirage"))
             {
                 Console.WriteLine("de_mirage");
                 ActiveMapClass = new de_mirage();
@@ -172,12 +200,19 @@ namespace ScriptKidAntiCheat.Classes
             {
                 Console.WriteLine("de_train");
                 ActiveMapClass = new de_train();
-            } else
+            }
+            else if (MemMapName.Contains("de_vertigo"))
+            {
+                Console.WriteLine("de_vertigo");
+                ActiveMapClass = new de_vertigo();
+            }
+            else
             {
                 Console.WriteLine("GenericMap");
                 Console.WriteLine(MemMapName);
                 ActiveMapClass = new GenericMap();
             }
+
         }
 
     }

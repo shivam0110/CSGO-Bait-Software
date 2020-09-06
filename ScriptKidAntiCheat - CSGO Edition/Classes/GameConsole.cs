@@ -27,13 +27,19 @@ namespace ScriptKidAntiCheat
         public GameConsole()
         {
             // Lets add required keybinding to users cs go config on first setup
-            if(!checkIfCfgIsReady())
+            if (!checkIfCfgIsReady())
             {
                 setupUserConfigs();
             }
-            
+
             // Create cfg file used to send commands to console using exec
             CFG_PATH = Helper.getPathToCSGO() + @"\cfg\cheater.cfg";
+
+            // Check for locally installed fake sounds (used for watching the replays with fake sounds)
+            if (File.Exists(Helper.getPathToCSGO() + @"\sound\flashed.wav"))
+            {
+                Helper.HasLocalSounds = true;
+            }
 
             if (!File.Exists(CFG_PATH))
             {
@@ -51,7 +57,7 @@ namespace ScriptKidAntiCheat
 
         private void setupUserConfigs()
         {
-            
+
             string[] users = Directory.GetDirectories(Helper.getPathToSteam() + @"\userdata");
             foreach (string user in users)
             {
@@ -66,7 +72,7 @@ namespace ScriptKidAntiCheat
                     {
                         // Bind F9 in player config to exec our cheater.cfg file
                         sw.WriteLine("\rbind \"F9\" \"exec cheater.cfg\"");
-                    } 
+                    }
                 }
             }
         }
@@ -130,7 +136,8 @@ namespace ScriptKidAntiCheat
                 if (!Command.EndsWith(";"))
                 {
                     combinedCommands += Command + ";";
-                } else
+                }
+                else
                 {
                     combinedCommands += Command;
                 }
@@ -152,7 +159,7 @@ namespace ScriptKidAntiCheat
             }
             catch (IOException e)
             {
-                
+
             }
 
             isWriting = false;
