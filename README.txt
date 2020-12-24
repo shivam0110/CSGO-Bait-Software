@@ -24,7 +24,7 @@ How do I send console commands without writing memory?
 the fake cheat adds "netconport" to csgo launch options which allows direct telnet access to read & write
 from console (built in functionality in source engine).
 
-Where is the code for DoYouEvenAimBro or BloodBrothers or RolfCopter?
+Where is the code for DoYouEvenAimBro or BloodBrothers or RoflCopter?
 I have removed these punishments from the public source code because I don't want to support
 the spread of code that can easily be changed into real cheats. By changing 1 line of code 
 in those punishments they could have been turned into a working triggerbot/aimbot.
