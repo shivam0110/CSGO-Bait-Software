@@ -8,7 +8,7 @@ The main reason for me to share the source code is to serve as evidence
 that my videos are not faked. If you have come here to learn programming 
 this is not a good place to start and you should google real tutorials 
 instead. This project is poorly documented, poorly written with a lot of 
-hacky solutions or copy pasted snippets.
+hacky solutions.
 
 MemoryReading
 This project reads the memory to get information from the game. 
@@ -21,18 +21,13 @@ This project _do not_ rely on memory writing at all. There was simply no need
 to write memory to accomplish what was needed for the purpose of this bait software.
 
 How do I send console commands without writing memory?
-This is a bit hacky but gets the job done: In csgo you can bind keys to execute console commands from
-cfg files stored in the csgo directory. The fake cheat manipulates the cheaters config file
-and adds a keybinding to execute a cfg file called cheater.cfg. Whatever console command I want
-to send I just write it to that file then programatically simulate pressing the key bound to 
-execute the cheater.cfg
+the fake cheat adds "netconport" to csgo launch options which allows direct telnet access to read & write
+from console (built in functionality in source engine).
 
-Where is the code for DoYouEvenAimBro or BloodBrothers?
-I have removed these punishments from the public source code because I don't want support
+Where is the code for DoYouEvenAimBro or BloodBrothers or RolfCopter?
+I have removed these punishments from the public source code because I don't want to support
 the spread of code that can easily be changed into real cheats. By changing 1 line of code 
-in those punishments they could have been turned into a working triggerbot. If you wanna
-learn there are plenty of triggerbot tutorials out there and all I did was to add a check
-before fire event to see if entity was same team or not.
+in those punishments they could have been turned into a working triggerbot/aimbot.
 
 Debugging
 In program.cs I have prepared debugging settings and turned off running the process in background
@@ -45,14 +40,6 @@ I have also tried to credit the authors in the classes where I have used copy pa
 based code on someone else code or tutorial.
 
 How do I create tripwires?
-In the helper class I have a method that reads the coordinates in the correct
-format that is used when adding tripwires. Step 1: Start the fake cheat, Step 2: Go to the location
-in-game where you want to setup a tripwire. Step 3: Press 'p' 4 times (one for each corner of the
-tripwire in-game, remember to move to each corner in the gameworld before each keypress).
-Step 4: copy the coordinates from visual studio output (generated every 4th press of 'p' key)
-Step 5: create new TripWire instance and use the coordinats you collected from output.
-You can press 'c' key to reset the 'p' press counter (to manually start over).
-The z value can be used to make a tripwire only trigger on a certain height of the map or leave
-it at 0 to make it trigger no matter how high or low the player enters the tripwire on the map.
+I explain this in this video: https://youtu.be/CNWkq7NH1g8?t=260
 
 // ScriptKid
