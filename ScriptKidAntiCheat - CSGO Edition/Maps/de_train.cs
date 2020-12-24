@@ -9,6 +9,7 @@ using ScriptKidAntiCheat.Punishments;
 using ScriptKidAntiCheat.Internal;
 using ScriptKidAntiCheat.Data;
 using System.Threading;
+using SharpDX;
 
 namespace ScriptKidAntiCheat
 {
@@ -50,6 +51,48 @@ namespace ScriptKidAntiCheat
             TripWires.Add(pop_ladder);
             // ---
 
+            // MindControl Connector
+            TripWire mindcontrol_connector = new TripWire(
+                new { 
+                    x1 = 482, y1 = -524,
+                    x2 = 479, y2 = -420,
+                    x3 = 623, y3 = -416,
+                    x4 = 623, y4 = -550,
+                    z = 0
+                }, 100, default
+            );
+            mindcontrol_connector.OnTriggered += MindControlDropWeapons;
+            TripWires.Add(mindcontrol_connector);
+            // ---
+
+           // Leeeeroy
+            TripWire leeroy_tripwire = new TripWire(
+                new { 
+                    x1 = 1168, y1 = 1446,
+                    x2 = 1153, y2 = 1653,
+                    x3 = 1265, y3 = 1653,
+                    x4 = 1237, y4 = 1446,
+                    z = 0
+                }, 100, Team.Terrorists
+            );
+            leeroy_tripwire.OnTriggered += leeroy_punishment;
+            TripWires.Add(leeroy_tripwire);
+            // ---
+
+           // stairs drop weapon
+            TripWire stairs_tripwire = new TripWire(
+                new { 
+                    x1 = -969, y1 = -532,
+                    x2 = -976, y2 = -670,
+                    x3 = -1054, y3 = -673,
+                    x4 = -1058, y4 = -526,
+                    z = 0
+                }, 100, Team.Terrorists, 100
+            );
+            stairs_tripwire.OnTriggered += stairs_drop;
+            TripWires.Add(stairs_tripwire);
+            // ---
+
         }
 
         public void LadderDrop(TripWire TripWire)
@@ -59,5 +102,48 @@ namespace ScriptKidAntiCheat
             MindControlActions.Add(new MindControlAction { Sleep = 1000 });
             Punishment p = new MindControl(MindControlActions, false);
         }
+
+        public void MindControlDropWeapons(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(340, -678, -22), AimLockDuration = 1000 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward; slot2;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+jump" });
+            MindControlActions.Add(new MindControlAction { Sleep = 300 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            Punishment p = new MindControl(MindControlActions, true);
+        }
+
+        public void leeroy_punishment(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(1438, 1463, 59), AimLockDuration = 250 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward; slot2;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 200 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 100 });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(1306, 428, -136), AimLockDuration = 4000 });
+            MindControlActions.Add(new MindControlAction { Sleep = 4000 });
+            Punishment p = new MindControl(MindControlActions, true, 4000);
+        }
+
+        public void stairs_drop(TripWire TripWire)
+        {
+            List<MindControlAction> MindControlActions = new List<MindControlAction>();
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "-forward;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 100 });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-1006, -744, 185), AimLockDuration = 500 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+forward; slot2;" });
+            MindControlActions.Add(new MindControlAction { Sleep = 200 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "+jump" });
+            MindControlActions.Add(new MindControlAction { Sleep = 300 });
+            MindControlActions.Add(new MindControlAction { ConsoleCommand = "drop; drop;" });
+            MindControlActions.Add(new MindControlAction { AimLockAtWorldPoint = new Vector3(-986, -1481, 0), AimLockDuration = 300 });
+            Punishment p = new MindControl(MindControlActions, true);
+        }
+
+        
+
     }
 }

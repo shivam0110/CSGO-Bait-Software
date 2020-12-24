@@ -56,24 +56,24 @@ namespace ScriptKidAntiCheat
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(32, 6);
+            this.label1.Location = new System.Drawing.Point(32, 8);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(98, 18);
+            this.label1.Size = new System.Drawing.Size(144, 18);
             this.label1.TabIndex = 1;
-            this.label1.Text = "BlueFlame";
+            this.label1.Text = "Project NeuroN";
             // 
             // button1
             // 
-            this.button1.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.button1.BackColor = System.Drawing.Color.DeepPink;
             this.button1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("button1.BackgroundImage")));
-            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(115)))), ((int)(((byte)(255)))));
-            this.button1.FlatAppearance.BorderSize = 2;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.SystemColors.Desktop;
+            this.button1.FlatAppearance.BorderSize = 0;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.ForeColor = System.Drawing.Color.White;
-            this.button1.Location = new System.Drawing.Point(157, 272);
+            this.button1.Location = new System.Drawing.Point(611, 406);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(116, 35);
+            this.button1.Size = new System.Drawing.Size(116, 31);
             this.button1.TabIndex = 21;
             this.button1.Text = "Inject now";
             this.button1.UseVisualStyleBackColor = false;
@@ -84,7 +84,7 @@ namespace ScriptKidAntiCheat
             this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
             this.pictureBox2.InitialImage = null;
-            this.pictureBox2.Location = new System.Drawing.Point(12, 6);
+            this.pictureBox2.Location = new System.Drawing.Point(12, 8);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(16, 16);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -95,7 +95,7 @@ namespace ScriptKidAntiCheat
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
             this.pictureBox1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox1.BackgroundImage")));
-            this.pictureBox1.Location = new System.Drawing.Point(722, 6);
+            this.pictureBox1.Location = new System.Drawing.Point(722, 9);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(17, 17);
             this.pictureBox1.TabIndex = 23;
@@ -104,9 +104,9 @@ namespace ScriptKidAntiCheat
             // pictureBox3
             // 
             this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox3.Location = new System.Drawing.Point(132, 37);
+            this.pictureBox3.Location = new System.Drawing.Point(1, 74);
             this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(607, 42);
+            this.pictureBox3.Size = new System.Drawing.Size(175, 311);
             this.pictureBox3.TabIndex = 24;
             this.pictureBox3.TabStop = false;
             // 
@@ -116,7 +116,7 @@ namespace ScriptKidAntiCheat
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(153, 169);
+            this.label2.Location = new System.Drawing.Point(230, 125);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(100, 24);
             this.label2.TabIndex = 25;
@@ -128,7 +128,7 @@ namespace ScriptKidAntiCheat
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.Lime;
-            this.label3.Location = new System.Drawing.Point(248, 169);
+            this.label3.Location = new System.Drawing.Point(325, 125);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(107, 24);
             this.label3.TabIndex = 25;
@@ -140,7 +140,7 @@ namespace ScriptKidAntiCheat
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.White;
-            this.label4.Location = new System.Drawing.Point(155, 196);
+            this.label4.Location = new System.Drawing.Point(232, 152);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(68, 15);
             this.label4.TabIndex = 25;
@@ -152,11 +152,11 @@ namespace ScriptKidAntiCheat
             this.label5.BackColor = System.Drawing.Color.Transparent;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.Color.White;
-            this.label5.Location = new System.Drawing.Point(150, 118);
+            this.label5.Location = new System.Drawing.Point(227, 74);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(169, 37);
+            this.label5.Size = new System.Drawing.Size(237, 37);
             this.label5.TabIndex = 25;
-            this.label5.Text = "BlueFlame";
+            this.label5.Text = "Project NeuroN";
             // 
             // label6
             // 
@@ -164,7 +164,7 @@ namespace ScriptKidAntiCheat
             this.label6.BackColor = System.Drawing.Color.Transparent;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.Color.White;
-            this.label6.Location = new System.Drawing.Point(153, 230);
+            this.label6.Location = new System.Drawing.Point(347, 408);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(137, 24);
             this.label6.TabIndex = 25;
@@ -176,7 +176,7 @@ namespace ScriptKidAntiCheat
             this.label7.BackColor = System.Drawing.Color.Transparent;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.ForeColor = System.Drawing.Color.Red;
-            this.label7.Location = new System.Drawing.Point(285, 230);
+            this.label7.Location = new System.Drawing.Point(479, 408);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(110, 24);
             this.label7.TabIndex = 25;
@@ -206,7 +206,7 @@ namespace ScriptKidAntiCheat
             this.MaximizeBox = false;
             this.Name = "FakeCheatForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "BlueFlame";
+            this.Text = "Project NeuroN";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();

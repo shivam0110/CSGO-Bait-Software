@@ -56,7 +56,7 @@ namespace ScriptKidAntiCheat
                     x3 = 1708, y3 = -383,
                     x4 = 1709, y4 = -246,
                     z = 0
-                }, 100, default, 50
+                }, 50, default, 50
             );
             a_aps.checkFromMemory = true;
             a_aps.OnTriggered += DropThatGun;

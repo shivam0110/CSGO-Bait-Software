@@ -27,7 +27,7 @@ namespace ScriptKidAntiCheat
                     x3 = -1567, y3 = 943,
                     x4 = -1378, y4 = 980,
                     z = 0
-                }, 100, Team.Terrorists
+                }, 50, Team.Terrorists
             );
             mindcontrol.OnTriggered += MindControl1;
             TripWires.Add(mindcontrol);
@@ -41,7 +41,7 @@ namespace ScriptKidAntiCheat
                     x3 = -2369, y3 = 114,
                     x4 = -2369, y4 = -20,
                     z = 0
-                }, 100
+                }, 50
             );
             mindcontrol2.OnTriggered += MindControl2;
             TripWires.Add(mindcontrol2);
@@ -69,7 +69,7 @@ namespace ScriptKidAntiCheat
                     x3 = -918, y3 = -1382,
                     x4 = -1029, y4 = -1387,
                     z = 0
-                }, 100
+                }, 50
             );
             mindcontrol4.OnTriggered += MindControl4;
             TripWires.Add(mindcontrol4);
@@ -83,7 +83,7 @@ namespace ScriptKidAntiCheat
                     x3 = -164, y3 = -59,
                     x4 = -165, y4 = -4,
                     z = 0
-                }, 100, Team.CounterTerrorists
+                }, 50, Team.CounterTerrorists
             );
             yeeet.OnTriggered += Yeeeeeeeet;
             TripWires.Add(yeeet);

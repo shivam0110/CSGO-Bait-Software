@@ -1,12 +1,17 @@
 ﻿using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using static ScriptKidAntiCheat.Utils.MouseHook;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: BurningMan
+     DESCRIPTION: Cause the cheater to throw molly and nades straight down
+    */
     class BurningMan : Punishment
     {
         public bool IsThrowing = false;
@@ -50,7 +55,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "BurningManException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -59,6 +70,8 @@ namespace ScriptKidAntiCheat.Punishments
             if (base.CanActivate() == false) return;
 
             IsThrowing = true;
+
+            Program.FakeCheat.DisableCSGOESCMenu = true;
 
             Task.Run(() =>
             {
@@ -75,6 +88,10 @@ namespace ScriptKidAntiCheat.Punishments
                 PlayerConfig.ResetConfig();
 
                 IsThrowing = false;
+
+                Thread.Sleep(4000);
+
+                Program.FakeCheat.DisableCSGOESCMenu = false;
             });
 
             base.AfterActivate(true, this.GetType().Name + "(" + TypeOfNade + ")");

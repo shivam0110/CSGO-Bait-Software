@@ -9,16 +9,22 @@ using System.Threading.Tasks;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: MindControl
+     DESCRIPTION: Take full control of cheater (unbind their movement) and make them do stuff
+    */
     class MindControl : Punishment
     {
 
-        public MindControl(List<MindControlAction> Actions, bool FakeFlash = true, int FakeFlashDuration = 2000) : base(0, true, 50)
+        public MindControl(List<MindControlAction> Actions, bool FakeFlash = true, int FakeFlashDuration = 2000, bool logging = true) : base(0, true, 50)
         {
             if (Actions == null) return;
 
             try
             {
                 if (base.CanActivate() == false) return;
+
+                Program.FakeCheat.DisableCSGOESCMenu = true;
 
                 Task.Run(() =>
                 {
@@ -53,11 +59,22 @@ namespace ScriptKidAntiCheat.Punishments
 
                 });
 
-                base.AfterActivate();
+                Program.FakeCheat.DisableCSGOESCMenu = false;
+
+                base.AfterActivate(logging);
             }
             catch (Exception ex)
             {
-                // yeet
+                if(logging)
+                {
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "Error",
+                        AnalyticsAction = "MindControlException",
+                        AnalyticsLabel = ex.Message
+                    });
+                }
             }
 
         }

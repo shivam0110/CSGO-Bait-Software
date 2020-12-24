@@ -23,6 +23,8 @@ namespace ScriptKidAntiCheat.Utils
 
         public bool DisableGoogleDriveUpload { get; set; } = false;
 
+        public bool DisableJsonLog { get; set; } = false;
+
         public bool DisableAcceptConditions { get; set; } = false;
 
         public bool ShowDebugMessages { get; set; } = false;
@@ -31,9 +33,10 @@ namespace ScriptKidAntiCheat.Utils
 
         public bool SkipInitDelay { get; set; } = false;
 
+        public bool DebugLog { get; set; } = false;
+
         public Debug()
         {
-
             if (File.Exists("debug.txt"))
             {
                 var fieldInfos = typeof(Debug).GetFields();

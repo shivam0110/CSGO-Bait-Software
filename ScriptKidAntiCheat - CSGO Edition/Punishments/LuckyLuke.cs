@@ -1,11 +1,16 @@
 ﻿using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Timers;
 using static ScriptKidAntiCheat.Utils.MouseHook;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT:    LuckyLuke
+     DESCRIPTION:   When shooting while ads with awp/scout play fake gun sound but don't fire a bullet (caused by weapon fast switch)
+    */
     class LuckyLuke : Punishment
     {
         public bool LuckyLukeModeIsActive = false;
@@ -62,7 +67,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "LuckyLukeException1",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
         private void Event(object MouseEvent, EventArgs e)
@@ -87,7 +98,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "LuckyLukeException2",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
         }

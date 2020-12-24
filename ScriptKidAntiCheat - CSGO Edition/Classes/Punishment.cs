@@ -4,6 +4,7 @@ using ScriptKidAntiCheat.Internal;
 using ScriptKidAntiCheat.Utils;
 using ScriptKidAntiCheat.Win32;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
@@ -16,8 +17,9 @@ namespace ScriptKidAntiCheat.Punishments
         public bool Enabled { get; set; } = true;
 
         public System.Timers.Timer ticker;
+        virtual public bool DisposeOnReset { get; set; } = true;
 
-        private bool unsubscribeOnDispose = false;
+        private bool unsubscribeOnDispose { get; set; } = false;
         virtual public int ActivateOnRound { get; set; } = 0;
         virtual public int DeactivateOnRound { get; set; } = 30;
         public GameProcess GameProcess { get; set; }
@@ -42,7 +44,7 @@ namespace ScriptKidAntiCheat.Punishments
                 GameData.MatchInfo.OnMatchNewRound += ResetOnMatchNewRound;
             }
 
-            if (resetTime != 0)
+            if(resetTime != 0) 
             {
                 ResetAfter(resetTime);
             }
@@ -56,14 +58,20 @@ namespace ScriptKidAntiCheat.Punishments
         {
             string PunishmentLogName = this.GetType().Name;
 
-            if (overrideName != "")
+            if(overrideName != "")
             {
                 PunishmentLogName = overrideName;
             }
 
-            if (logging)
+            if(logging)
             {
-                ReplayLogger.Log(PunishmentLogName);
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Replay, LogTypes.JsonStorage, LogTypes.Analytics },
+                    IncludeTimeAndTick = true,
+                    AnalyticsCategory = "Punishments",
+                    LogMessage = PunishmentLogName
+                });
 
                 if (Program.Debug.ShowDebugMessages)
                 {
@@ -76,7 +84,7 @@ namespace ScriptKidAntiCheat.Punishments
 
         virtual public bool CanActivate()
         {
-            if (Enabled == false)
+            if(Enabled == false)
             {
                 return false;
             }
@@ -86,7 +94,7 @@ namespace ScriptKidAntiCheat.Punishments
                 return false;
             }
 
-            if ((GameData.MatchInfo.RoundNumber < ActivateOnRound || GameData.MatchInfo.RoundNumber > DeactivateOnRound) && Program.Debug.IgnoreActivateOnRound == false)
+            if ((GameData.MatchInfo.RoundNumber < ActivateOnRound || GameData.MatchInfo.RoundNumber > DeactivateOnRound) && Program.Debug.IgnoreActivateOnRound == false )
             {
                 return false;
             }
@@ -103,7 +111,10 @@ namespace ScriptKidAntiCheat.Punishments
         private void ResetOnMatchNewRound(object sender, EventArgs e)
         {
             this.Reset();
-            this.Dispose();
+            if(DisposeOnReset)
+            {
+                this.Dispose();
+            }
         }
 
         virtual public void Reset()

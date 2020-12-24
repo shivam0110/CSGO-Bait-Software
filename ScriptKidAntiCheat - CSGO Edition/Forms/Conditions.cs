@@ -23,7 +23,6 @@ namespace ScriptKidAntiCheat
         private bool drag = false; // determine if we should be moving the form
         private Point startPoint = new Point(0, 0); // also for the moving
 
-
         public Conditions()
         {
 
@@ -50,8 +49,15 @@ namespace ScriptKidAntiCheat
 
             pictureBox2.BringToFront();
 
-
             label1.BringToFront();
+
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                IncludeTimeAndTick = false,
+                AnalyticsCategory = "Conditions",
+                AnalyticsAction = "Shown"
+            });
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -66,6 +72,13 @@ namespace ScriptKidAntiCheat
         {
             if (checkBox1.Checked)
             {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Conditions",
+                    AnalyticsAction = "AcceptedTerms"
+                });
                 acceptedTerms = true;
                 this.Close();
             }

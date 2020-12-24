@@ -141,6 +141,7 @@ namespace ScriptKidAntiCheat
             // ---
 
             // Window B House
+            /*
             TripWire window_b_house = new TripWire(
                 new
                 {
@@ -154,6 +155,7 @@ namespace ScriptKidAntiCheat
             window_b_house.OnTriggered += ByeByeGuns;
             TripWires.Add(window_b_house);
             // ---
+            */
 
         }
 
@@ -170,8 +172,8 @@ namespace ScriptKidAntiCheat
 
         public void debugging_tripwire(TripWire TripWire)
         {
-            Punishment p = new ReverseSpeedhack();
-            //Punishment p = new DrunkenMaster();
+            //Punishment p = new ReverseSpeedhack();
+            Punishment p = new DrunkenMaster();
         }
 
         public void ByeByeGuns(TripWire TripWire)

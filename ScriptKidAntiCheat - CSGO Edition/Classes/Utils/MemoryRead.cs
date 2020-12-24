@@ -1,7 +1,10 @@
 ﻿using ScriptKidAntiCheat.Win32;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ScriptKidAntiCheat.Utils
 {
@@ -51,7 +54,10 @@ namespace ScriptKidAntiCheat.Utils
 
             if (lpNumberOfBytesRead == size)
             {
-                return Encoding.ASCII.GetString(buffer);
+                // Remove unused bytes from string
+                var length = buffer.TakeWhile(b => b != 0).Count();
+                var text = Encoding.UTF8.GetString(buffer, 0, length);
+                return text;
             }
             else
             {
@@ -59,5 +65,38 @@ namespace ScriptKidAntiCheat.Utils
             }
         }
 
+        public static int PatternScan(Module module, byte[] pattern, string mask)
+        {
+            int moduleSize;
+            IntPtr BaseAddress = module.ProcessModule.BaseAddress;
+
+            moduleSize = module.ProcessModule.ModuleMemorySize;
+
+            if (moduleSize == 0) return 0;
+
+            byte[] moduleBytes = new byte[moduleSize];
+            int numBytes;
+
+            if (Kernel32.ReadProcessMemory(module.Process.Handle, BaseAddress, moduleBytes, moduleSize, out numBytes)) //do one large RPM vs many small RPM - this will be your most significant speedup
+            {
+                for (int i = 0; i < moduleSize; i++) //you can subtract your mask length here but the difference in speed is negligible
+                {
+                    bool found = true;
+
+                    for (int l = 0; l < mask.Length; l++)
+                    {
+                        found = mask[l] == '?' || moduleBytes[l + i] == pattern[l];
+
+                        if (!found)
+                            break;
+                    }
+
+                    if (found)
+                        return i;
+                }
+            }
+
+            return 0;
+        }
     }
 }

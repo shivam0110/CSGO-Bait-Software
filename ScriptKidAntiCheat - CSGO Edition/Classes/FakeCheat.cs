@@ -1,7 +1,14 @@
-﻿using ScriptKidAntiCheat.Classes.Utils;
+﻿using Gma.System.MouseKeyHook;
+using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
+using System.Security.Cryptography;
+using System.Windows.Forms;
+using ScriptKidAntiCheat.Data;
 
 namespace ScriptKidAntiCheat.Classes
 {
@@ -10,209 +17,527 @@ namespace ScriptKidAntiCheat.Classes
         public ReplayMonitor ReplayMonitor;
         public Map ActiveMapClass { get; set; }
 
+        public bool PunishmentsLoaded = false;
+
+        public string ActiveMapName = "";
+
         public bool ConfigBackupCreated = false;
 
-        private static System.Timers.Timer ticker;
+        public bool JsonLogCreated = false;
 
-        private static System.Timers.Timer ticker2;
+        public bool HasConnectedToGame = false;
 
-        public bool InDemo = false;
+        public bool ConsoleGatewayInit;
+
+        public bool DisableCSGOESCMenu = false;
+
+        public bool errorsFound = false;
+
+        public string CurrentMatchID = null;
 
         public DateTime startTime;
 
         public DateTime endTime;
 
+        private GameProcess GameProcess;
+
+        private GameConsole GameConsole;
+
+        private GameData GameData;
+
+        private Debug Debug;
+
         public int ClientState { get; set; } = -1; // Don't change this
 
         public FakeCheat()
         {
+            GameProcess = Program.GameProcess;
+            GameConsole = Program.GameConsole;
+            GameData = Program.GameData;
+            Debug = Program.Debug;
+
+            Log.AddEntry(new LogEntry() {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                IncludeTimeAndTick = false,
+                AnalyticsCategory = "FakeCheat",
+                AnalyticsAction = "Loaded"
+            });
+
             MouseHook.Start();
 
             // Start replay monitor
             ReplayMonitor = new ReplayMonitor();
 
-            // Start timer that triggers memory scans
-            ticker = new System.Timers.Timer(500);
-            ticker.Elapsed += tick;
-            ticker.AutoReset = true;
-            ticker.Enabled = true;
+            // Event that fires on each new round
+            GameData.MatchInfo.OnMatchNewRound += OnNewMatchRound;
 
-            ticker2 = new System.Timers.Timer(1);
-            ticker2.Elapsed += tick2;
-            ticker2.AutoReset = true;
-            ticker2.Enabled = true;
+            Program.m_GlobalHook.KeyDown += DenyESC;
+
+            Program.m_GlobalHook.OnCombination(new Dictionary<Combination, Action>
+            {
+                {Combination.FromString("F5"), () => {
+                    PrintDebugData();
+                 }},
+                {Combination.FromString("F6"), () => {
+                    Program.GameConsole.SendCommand("say Debug info: TripWires Reset");
+                    Program.FakeCheat.ActiveMapClass.resetTripWires();
+                 }},
+                {Combination.FromString("F7"), () => {
+                    MessageBox.Show("FakeCheat Terminated", "Debug", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+                    System.Windows.Forms.Application.Exit();
+                 }},
+            });
 
             // Setup hotkeys to log player location on map to be used for TripWires
             if (Program.Debug.AllowLocal)
             {
                 Program.m_GlobalHook.KeyPress += Helper.TripWireMaker;
             }
-        }
 
-        private void tick2(Object source, ElapsedEventArgs e)
-        {
-            if (InDemo && Program.Debug.ShowDebugMessages)
+            // Main ticker
+            Task.Run(() =>
             {
-                SendInput.KeyPress(KeyCode.KEY_0);
-            }
-        }
-
-        private void tick(Object source, ElapsedEventArgs e)
-        {
-            if (Program.GameProcess.IsValidAndActiveWindow && ConfigBackupCreated == false)
-            {
-                ConfigBackupCreated = true;
-                PlayerConfig.CreateBackup();
-            }
-
-            // Check if memory reader is loaded
-            if (Program.GameProcess.IsValid)
-            {
-
-                if (Helper.MouseIsCalibrated == false && Program.GameData.ClientState == 6)
+                try
                 {
-                    bool calibrateMouse = false;
-
-                    if (startTime == null)
+                    while (true)
                     {
-                        calibrateMouse = true;
-                    }
-                    else
-                    {
-                        endTime = DateTime.Now;
-                        Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
-                        // Retry every 5 seconds
-                        if (elapsedMillisecs > 5000)
-                        {
-                            calibrateMouse = true;
-                        }
-                    }
-
-                    if (calibrateMouse)
-                    {
-                        startTime = DateTime.Now;
-                        Helper.CalibrateMouseSensitivity();
+                        tick();
+                        Thread.Sleep(500);
                     }
                 }
-
-                if (Program.GameData.ClientState != ClientState)
+                catch (ThreadInterruptedException)
                 {
-                    ClientState = Program.GameData.ClientState;
+                    Console.WriteLine("MainThreadException");
+                }
+            });
+        }
+        private void PrintDebugData()
+        {
+            if (Program.Debug.DebugLog != true) return;
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "-----------------------------------"
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "IsValid: " + (Program.GameProcess.IsValid ? "true" : "false")
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "HasConnectedToGame: " + (HasConnectedToGame ? "true" : "false")
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "IsMatchmaking: " + (Program.GameData.MatchInfo.IsMatchmaking ? "true" : "false")
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "ClientState: " + Program.GameData.ClientState
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "NickName: " + Program.GameData.Player.NickName
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "MatchID: " + Program.GameData.MatchInfo.MatchID
+            });
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Debug },
+                LogMessage = "-----------------------------------"
+            });
+        }
 
-                    // Upload any existing replays (0 = Not connected)
-                    if (ClientState == 0)
+        private void DenyESC(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Escape && Program.GameProcess.IsValidAndActiveWindow && Program.GameConsole.connected && Program.GameData.ClientState == 6 && DisableCSGOESCMenu)
+            {
+                Program.GameConsole.SendCommand("escape");
+            }
+        }
+
+        private void tick()
+        {
+            try
+            {
+                bool TimeToReset = false;
+
+                // Detect if MatchId has changed (new matchmaking game)
+                if(MatchIdHasChanged() == true)
+                {
+                    JsonLogCreated = false;
+                    TimeToReset = true;
+                }
+
+                // Detect if ClientState has changed
+                if (ClientStateHasChanged() == true)
+                {
+                    // Fully Connected to a new game
+                    if(ClientState == 6)
                     {
+                        TimeToReset = true;
+                    }
+
+                    // In menues or csgo not running
+                    if (ClientState == 0 || ClientState == -1)
+                    {
+                        // Try update json storage log
+                        Log.UploadJsonLog();
+                        // Try upload any existing replays
                         ReplayMonitor.checkForReplaysToUpload();
                     }
-
-                    // 6 = Connected and ingame
-                    if (ClientState == 6)
-                    {
-                        setupPunishmentsAndTripWires();
-                    }
-                    else
-                    {
-                        // Dispose ActiveMapClass
-                        if (ActiveMapClass != null)
-                        {
-                            ActiveMapClass.Dispose();
-                            ActiveMapClass = null;
-                        }
-                    }
-
                 }
 
+                // Reset everything
+                if (TimeToReset) Reset();
+
+                // Setup console gateway
+                if (ConsoleGatewayInit == false)
+                {
+                    CreateConsoleGateway();
+                }
+
+                // Create cheater config backup (used for resetting some punishments)
+                if (ConfigBackupCreated == false)
+                {
+                    CreatePlayerConfigBackup();
+                }
+
+                // Create json log (backup logging sent between each new round)
+                if (JsonLogCreated == false)
+                {
+                    CreateNewJsonLog();
+                }
+
+                // Load current map class and its punishments
+                if (PunishmentsLoaded == false)
+                {
+                    LoadPunishments();
+                }
+
+                // Calibrate mouse (used for some punishments to move the mouse to correct position in 3d space)
+                if (Helper.MouseIsCalibrated == false)
+                {
+                    AttemptMouseCalibration();
+                }
+
+                checkForErrors();
+            }
+            catch (Exception ex)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "MainTickException",
+                    AnalyticsLabel = ex.Message
+                });
+                ReplayMonitor.checkForReplaysToUpload();
             }
 
         }
 
-        private void setupPunishmentsAndTripWires()
+        private void OnNewMatchRound(object sender, EventArgs e)
         {
-            string MemMapName = Program.GameData.MatchInfo.MapName;
+            if (GameData.MatchInfo.IsMatchmaking == false && Debug.AllowLocal != true) return;
 
-            if (Program.GameProcess.IsValidAndActiveWindow == false)
+            Console.WriteLine("New round detected");
+
+            // Try start new pov replay recording
+            try
             {
-                return; // Process not valid or game window not focused
+                ReplayMonitor.StartRecording();
+            }
+            catch (Exception ex)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "NewRoundStartRecordingException",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
-            if (Program.GameData.MatchInfo.IsMatchmaking == false && Program.Debug.AllowLocal == false)
+            // Try update json storage log
+            Log.UploadJsonLog();
+
+        }
+
+        private void Reset()
+        {
+            Console.WriteLine("FullReset");
+            if (ActiveMapClass != null)
             {
-                return; // Not in matchmaking
+                ActiveMapClass.Dispose();
+                ActiveMapClass = null;
+            }
+            PunishmentsLoaded = false;
+            HasConnectedToGame = false;
+            errorsFound = false;
+        }
+
+        private void CreateConsoleGateway()
+        {
+            if (GameProcess.IsValidAndActiveWindow)
+            {
+                // Telnet connection with game console
+                Task.Run(() =>
+                {
+                    GameConsole.Connect();
+                });
+                ConsoleGatewayInit = true;
+            }
+        }
+
+        private bool ClientStateHasChanged()
+        {
+            int CurrentClientState = GameProcess.IsValid ? GameData.ClientState : -1;
+
+            if (CurrentClientState != ClientState)
+            {
+                ClientState = CurrentClientState;
+                return true;
             }
 
-            if (Program.GameData.ClientState != 6)
+            return false;
+        }
+
+        private bool MatchIdHasChanged()
+        {
+            if (GameProcess.IsValid)
             {
-                return; // 6 = Connected and ingame
+                string MatchID = GameData.MatchInfo.MatchID;
+
+                if(CurrentMatchID != MatchID)
+                {
+                    CurrentMatchID = MatchID;
+                    return true;
+                }
+                
             }
 
-            // Setup punishments & tripwires depending on what map is played
-            if (MemMapName.Contains("de_inferno"))
+            return false;
+        }
+
+        private void CreatePlayerConfigBackup()
+        {
+            if (GameProcess.IsValidAndActiveWindow)
             {
-                Console.WriteLine("de_inferno");
-                ActiveMapClass = new de_inferno();
+                PlayerConfig.CreateBackup();
+                ConfigBackupCreated = true;
             }
-            else if (MemMapName.Contains("de_cache"))
+        }
+        private void CreateNewJsonLog()
+        {
+            if (GameProcess.IsValid == false) return;
+            if (HasConnectedToGame == false) return;
+            if (ActiveMapName == null || ActiveMapName == "") return;
+            if (GameData.MatchInfo.IsMatchmaking == false && Debug.AllowLocal == false) return;
+            
+            string NickName = GameData.Player.NickName;
+            string MatchID = GameData.MatchInfo.MatchID;
+
+            if (NickName != null && NickName != "")
             {
-                Console.WriteLine("de_cache");
-                ActiveMapClass = new de_cache();
+                if (MatchID != null)
+                {
+                    string ReplayName = NickName + " | " + ActiveMapName;
+                    string ReplayID = MatchID.ToString();
+
+                    // Create JSON Log (logged online)
+                    Log.CreateJsonLog(ReplayID, NickName, ReplayName);
+
+                    CurrentMatchID = MatchID;
+                    JsonLogCreated = true;
+                }
             }
-            else if (MemMapName.Contains("de_dust2"))
+        }
+
+        private void LoadPunishments()
+        {
+            if (GameProcess.IsValidAndActiveWindow == false) return;
+
+            string NickName = GameData.Player.NickName;
+            string MatchID = GameData.MatchInfo.MatchID;
+
+            if (GameData.Player.IsAlive() == false) return;
+            if (GameData.ClientState != 6) return;
+            if (NickName == "") return; 
+
+            if(Debug.AllowLocal != true)
             {
-                Console.WriteLine("de_dust2");
-                ActiveMapClass = new de_dust2();
+                if (GameData.MatchInfo.IsMatchmaking == false) return;
+                if (MatchID == null) return;
             }
-            else if (MemMapName.Contains("de_mirage"))
+
+            if(setupPunishmentsAndTripWires())
             {
-                Console.WriteLine("de_mirage");
-                ActiveMapClass = new de_mirage();
+                HasConnectedToGame = true;
+                PunishmentsLoaded = true;
             }
-            else if (MemMapName.Contains("de_nuke"))
+            
+        }
+
+        private void AttemptMouseCalibration()
+        {
+            bool calibrateMouse = false;
+
+            if (startTime == null)
             {
-                Console.WriteLine("de_nuke");
-                ActiveMapClass = new de_nuke();
-            }
-            else if (MemMapName.Contains("de_shortnuke"))
-            {
-                Console.WriteLine("de_shortnuke");
-                ActiveMapClass = new de_shortnuke();
-            }
-            else if (MemMapName.Contains("de_overpass"))
-            {
-                Console.WriteLine("de_overpass");
-                ActiveMapClass = new de_overpass();
-            }
-            else if (MemMapName.Contains("de_anubis"))
-            {
-                Console.WriteLine("de_anubis");
-                ActiveMapClass = new de_anubis();
-            }
-            else if (MemMapName.Contains("de_chlorine"))
-            {
-                Console.WriteLine("de_chlorine");
-                ActiveMapClass = new de_chlorine();
-            }
-            else if (MemMapName.Contains("de_train"))
-            {
-                Console.WriteLine("de_train");
-                ActiveMapClass = new de_train();
-            }
-            else if (MemMapName.Contains("de_train"))
-            {
-                Console.WriteLine("de_train");
-                ActiveMapClass = new de_train();
-            }
-            else if (MemMapName.Contains("de_vertigo"))
-            {
-                Console.WriteLine("de_vertigo");
-                ActiveMapClass = new de_vertigo();
+                calibrateMouse = true;
             }
             else
             {
-                Console.WriteLine("GenericMap");
-                Console.WriteLine(MemMapName);
-                ActiveMapClass = new GenericMap();
+                endTime = DateTime.Now;
+                Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
+                // Retry every 5 seconds
+                if (elapsedMillisecs > 5000)
+                {
+                    calibrateMouse = true;
+                }
             }
 
+            if (calibrateMouse)
+            {
+                startTime = DateTime.Now;
+                Helper.CalibrateMouseSensitivity();
+            }
+        }
+
+        private void checkForErrors()
+        {
+            if (GameProcess.IsValidAndActiveWindow)
+            {
+                if (Debug.SkipAnalyticsTracking || errorsFound) return;
+
+                string MatchID = GameData.MatchInfo.MatchID;
+
+                // Check MatchID
+                if (GameData.ClientState == 6 && GameData.MatchInfo.IsMatchmaking && (MatchID == null && Debug.AllowLocal == false))
+                {
+                    GameConsole.SendCommand("status");
+
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "Error",
+                        AnalyticsAction = "MissingMatchID"
+                    });
+
+                    errorsFound = true;
+                }
+
+                // Check Telnet
+                if (GameData.ClientState == 6 && GameConsole.TelnetTestSuccess == false)
+                {
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "Error",
+                        AnalyticsAction = "TelnetError"
+                    });
+                    errorsFound = true;
+                }
+
+                if(GameData.MatchInfo.IsMatchmaking && GameData.ClientState == 6)
+                {
+                    // Check ActiveMap
+                    if (ActiveMapName == "")
+                    {
+                        Log.AddEntry(new LogEntry()
+                        {
+                            LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                            AnalyticsCategory = "Error",
+                            AnalyticsAction = "MissingMapName"
+                        });
+                        errorsFound = true;
+                    }
+
+                    // Check PlayerName
+                    if (GameData.Player.NickName == "")
+                    {
+                        Log.AddEntry(new LogEntry()
+                        {
+                            LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                            IncludeTimeAndTick = false,
+                            AnalyticsCategory = "Error",
+                            AnalyticsAction = "MissingNickName"
+                        });
+                        errorsFound = true;
+                    }
+                }
+            }
+        }
+
+        private bool setupPunishmentsAndTripWires()
+        {
+
+            string MemMapName = Program.GameData.MatchInfo.MapName;
+
+            if (MemMapName == null || MemMapName == "" || MemMapName.ToLower().Contains("de_") == false)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "InvalidMapName",
+                    AnalyticsLabel = MemMapName
+                });
+                return false; // Fail
+            }
+
+            ClientState = 6;
+            HasConnectedToGame = true;
+            ActiveMapName = MemMapName;
+            string MatchID = Program.GameData.MatchInfo.MatchID;
+
+            if (MatchID != null)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "MatchID",
+                    AnalyticsAction = MatchID
+                });
+            }
+
+            // Start recording
+            Program.FakeCheat.ReplayMonitor.StartRecording();
+
+            Type MapClass = Type.GetType("ScriptKidAntiCheat." + ActiveMapName);
+
+            if(MapClass != null)
+            {
+               ActiveMapClass = (Map)Activator.CreateInstance(MapClass);
+            } else
+            {
+               ActiveMapClass = new GenericMap();
+            }
+
+            Console.WriteLine(ActiveMapName);
+
+            if (ActiveMapClass != null)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "MapLoads",
+                    AnalyticsAction = ActiveMapName
+                });
+            }
+
+            return true; // Success
         }
 
     }

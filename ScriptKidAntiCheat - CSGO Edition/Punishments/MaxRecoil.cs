@@ -1,6 +1,9 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
+using ScriptKidAntiCheat.Utils.Maths;
+using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -8,19 +11,25 @@ using System.Windows.Forms;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT:    MaxRecoil
+     DESCRIPTION:   Randomly make the recoil extremly hard to control throughout the match
+    */
     class MaxRecoil : Punishment
     {
         public override int ActivateOnRound { get; set; } = 3;
+        public override bool DisposeOnReset { get; set; } = false;
 
         public static bool logDelay = false;
 
         public Weapons LastActiveWeapon;
-
         public int BulletCount { get; set; } = -1;
 
-        private bool Dormant { get; set; } = false;
+        private bool AimedAtEnemy { get; set; } = false;
 
-        private bool Active { get; set; } = false;
+        private DateTime startTime;
+
+        private DateTime endTime;
 
         public MaxRecoil() : base(0, true, 50) // 0 = Always active
         {
@@ -31,6 +40,22 @@ namespace ScriptKidAntiCheat.Punishments
         {
             try
             {
+                if (Program.GameProcess.IsValidAndActiveWindow == false || Player.IsAlive() == false || base.CanActivate() == false || Program.GameData.MatchInfo.isFreezeTime)
+                {
+                    return;
+                }
+
+                if(IsAimingAtEnemy())
+                {
+                    startTime = DateTime.Now;
+                    AimedAtEnemy = true;
+                }
+
+                Double elapsedMillisecs = ((TimeSpan)(DateTime.Now - startTime)).TotalSeconds;
+                if (elapsedMillisecs > 3)
+                {
+                    AimedAtEnemy = false;
+                }
 
                 int AmmoInWeapon = Player.AmmoCount;
 
@@ -40,42 +65,67 @@ namespace ScriptKidAntiCheat.Punishments
                     BulletCount = AmmoInWeapon;
                 }
 
-                if (BulletCount != AmmoInWeapon)
+                if (BulletCount != AmmoInWeapon && AimedAtEnemy)
                 {
                     BulletCount = AmmoInWeapon;
-
-                    if (Dormant) return;
-
-                    int rnd = new Random().Next(2);
-
-                    // 33% chance to activate every 10 seconds when starting to shoot
-                    if(rnd == 0)
-                    {
-                        Active = true;
-                        Task.Run(() => {
-                            Thread.Sleep(30000);
-                            Active = false;
-                        });
-                    } else if(!Active)
-                    {
-                        Dormant = true;
-                        Task.Run(() => {
-                            Thread.Sleep(5000);
-                            Dormant = false;
-                        });
-                    }
-
-                    if(Active)
-                    {
-                        ActivatePunishment();
-                    }
-                    
-                } 
+                    ActivatePunishment();
+                }
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "MaxRecoilException",
+                    AnalyticsLabel = ex.Message
+                });
             }
+        }
+        
+        public bool IsAimingAtEnemy()
+        {
+            Vector3 AimDirection = Player.AimDirection;
+            Vector3 GetPlayerLocation = Player.EyePosition;
+
+            // get aim ray in world
+            if (AimDirection.Length() < 0.001)
+            {
+                return false;
+            }
+
+            var aimRayWorld = new Line3D(GetPlayerLocation, GetPlayerLocation + AimDirection * 8192);
+
+            // Go through entities
+            foreach (var entity in GameData.Entities)
+            {
+
+                if (!entity.IsAlive() || entity.AddressBase == Player.AddressBase)
+                {
+                    continue;
+                }
+
+                if (entity.Team == Player.Team)
+                {
+                    continue;
+                }
+
+                if (entity.Spotted == false)
+                {
+                    continue;
+                }
+
+                // Check if hitbox intersect with aimRay
+                var hitBoxId = Helper.IntersectsHitBox(aimRayWorld, entity);
+                if (hitBoxId >= 0)
+                {
+                    return true;
+                }
+
+                Thread.Sleep(10);
+            }
+
+            return false;
         }
 
         public void ActivatePunishment()
@@ -106,9 +156,8 @@ namespace ScriptKidAntiCheat.Punishments
 
         override public void Reset()
         {
-            Active = false;
-            Dormant = false;
             BulletCount = -1;
+            AimedAtEnemy = false;
         }
 
     }

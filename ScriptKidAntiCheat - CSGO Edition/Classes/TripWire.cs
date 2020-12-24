@@ -52,7 +52,7 @@ namespace ScriptKidAntiCheat.Utils
         public void checkTripWire(Object source, ElapsedEventArgs e)
         {
             if (!Program.GameProcess.IsValidAndActiveWindow || !Program.GameData.Player.IsAlive() || (Program.GameData.MatchInfo.isWarmup && !Program.Debug.AllowInWarmup)) return;
-            
+           
             if (active == false && resetOnLeave == false) return;
             
             IsBeingTripped = isTripWireBeingTripped();
@@ -61,7 +61,7 @@ namespace ScriptKidAntiCheat.Utils
 
             if (IsBeingTripped)
             {
-                if(active)
+                if (active)
                 {
                     TripWireTriggeredCallback();
                 }
@@ -102,7 +102,7 @@ namespace ScriptKidAntiCheat.Utils
 
         public void TripWireTriggeredCallback()
         {
-            if(disableOnTriggered)
+            if (disableOnTriggered)
             {
                 active = false;
             }

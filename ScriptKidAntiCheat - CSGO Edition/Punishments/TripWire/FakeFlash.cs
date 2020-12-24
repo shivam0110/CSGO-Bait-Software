@@ -1,6 +1,7 @@
 ﻿using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,10 @@ using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: FakeFlash
+     DESCRIPTION: Simulate flashbang by changing crosshair settings to cover the whole screen and fade from 0 to 100% white
+    */
     class FakeFlash : Punishment
     {
         private int FlashDuration { get; set; }
@@ -26,7 +31,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "FakeFlashException",
+                    AnalyticsLabel = ex.Message
+                });
             }
             
         }
@@ -35,9 +46,19 @@ namespace ScriptKidAntiCheat.Punishments
         {
             if (base.CanActivate() == false) return;
 
-            // Make sure we change to weapon with a scope first (all pistols have it)
-            Program.GameConsole.SendCommand("slot2");
+            Weapons ActiveWeapon = (Weapons)Player.ActiveWeapon;
 
+            // Make sure we change to weapon with a scope first (all pistols have it)
+            if (ActiveWeapon != Weapons.Knife_CT && 
+                ActiveWeapon != Weapons.Knife_T && 
+                ActiveWeapon != Weapons.Smoke &&
+                ActiveWeapon != Weapons.Grenade &&
+                ActiveWeapon != Weapons.Molotov &&
+                ActiveWeapon != Weapons.Incendiary &&
+                ActiveWeapon != Weapons.Flashbang)
+            {
+                Program.GameConsole.SendCommand("slot2");
+            }
 
             Program.GameConsole.SendCommand("play flashed");
 

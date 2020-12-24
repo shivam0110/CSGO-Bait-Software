@@ -1,9 +1,14 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: ButterFingers
+     DESCRIPTION: When cheater tries to fire their weapon drop it
+    */
     class ButterFingers : Punishment
     {
 
@@ -15,7 +20,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "ButterFingersException",
+                    AnalyticsLabel = ex.Message
+                });
             }
             
         }

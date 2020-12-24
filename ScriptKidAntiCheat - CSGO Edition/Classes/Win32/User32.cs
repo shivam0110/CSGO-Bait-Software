@@ -1,6 +1,7 @@
 ﻿using ScriptKidAntiCheat.Win32.Data;
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 /*
  * Credit: https://github.com/rciworks/RCi.Tutorials.Csgo.Cheat.External
@@ -19,6 +20,9 @@ namespace ScriptKidAntiCheat.Win32
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]

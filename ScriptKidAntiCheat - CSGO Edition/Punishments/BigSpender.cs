@@ -1,12 +1,17 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: BigSpender
+     DESCRIPTION: Waste cheaters economy buy force buying bad weapons
+    */
     class BigSpender : Punishment
     {
         public bool isBuying = false;
@@ -29,7 +34,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "BigSpenderException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 

@@ -1,12 +1,17 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: NoPlantOrDefuse
+     DESCRIPTION: Cancel plant or defuse in last second and play fake bomb has been planted / defused sound to confuse them
+    */
     class NoPlantOrDefuse : Punishment
     {
         public bool FakePlantStarted = false;
@@ -88,7 +93,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "NoPlantOrDefuseException",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
         }

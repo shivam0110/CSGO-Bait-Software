@@ -3,6 +3,7 @@ using ScriptKidAntiCheat.Utils;
 using ScriptKidAntiCheat.Utils.Maths;
 using SharpDX;
 using System;
+using System.Text;
 
 /*
  * Credit: https://github.com/rciworks/RCi.Tutorials.Csgo.Cheat.External
@@ -18,7 +19,7 @@ namespace ScriptKidAntiCheat.Internal
         public Vector3 AimPunchAngle { get; private set; }
         public Vector3 AimDirection { get; private set; }
         public Vector3 vecVelocity { get; private set; }
-        public int PlayerIndex { get; private set; } = 0;
+        public int PlayerIndex { get; set; } = 0;
         public int Fov { get; private set; }
         public int ClientState { get; private set; }
 
@@ -28,8 +29,12 @@ namespace ScriptKidAntiCheat.Internal
         public int AmmoCount { get; private set; }
         public bool HasDefuseKit { get; private set; } = false;
         public bool CanShoot { get; private set; } = false;
+        public bool CursorLocked { get; private set; } = false;
 
         public bool isAimingDownScope = false;
+        public string Location { get; set; }
+        public string SpawnLocationName { get; set; }
+        public string NickName { get; set; } = null;
 
         protected override IntPtr ReadAddressBase(GameProcess gameProcess)
         {
@@ -43,6 +48,12 @@ namespace ScriptKidAntiCheat.Internal
             short weaponID = gameProcess.Process.Read<short>(weaponEntity + Offsets.m_iItemDefinitionIndex);
 
             return weaponID;
+        }
+
+        public string getPlayerLocation(GameProcess gameProcess)
+        {
+            string locname = MemoryRead.ReadString(gameProcess.ModuleClient, AddressBase, Offsets.m_szLastPlaceName, 18);
+            return locname;
         }
 
         public void UpdatePrimaryWeapon(short ActiveWeapon)
@@ -76,15 +87,15 @@ namespace ScriptKidAntiCheat.Internal
             IntPtr weaponEntity = gameProcess.ModuleClient.Read<IntPtr>(Offsets.dwEntityList + (activeWeapon - 1) * 0x10);
             short weaponID = gameProcess.Process.Read<short>(weaponEntity + Offsets.m_iItemDefinitionIndex);
 
-            if ((Weapons)weaponID == Weapons.C4)
+            if((Weapons)weaponID == Weapons.C4)
             {
                 bool m_bStartedArming = gameProcess.Process.Read<bool>(weaponEntity + Offsets.m_bStartedArming);
-                if (m_bStartedArming)
+                if(m_bStartedArming)
                 {
                     return true;
                 }
             }
-
+            
             return false;
         }
 
@@ -112,14 +123,18 @@ namespace ScriptKidAntiCheat.Internal
             float m_flNextAttack = gameProcess.Process.Read<float>(AddressBase + Offsets.m_flNextAttack);
             float curtime = Program.GameData.MatchInfo.GlobalVars.curtime;
 
-            if ((m_flNextAttack - curtime) > 0)
+            if((m_flNextAttack - curtime) > 0)
             {
                 return false;
-            }
-            else
+            } else
             {
                 return true;
             }
+        }
+        public bool checkIfCursorLocked(GameProcess gameProcess)
+        {
+            bool CursorLocked = (gameProcess.ModuleClient.Read<byte>(Offsets.dwMouseEnable) & 1) == 1 ? true : false;
+            return CursorLocked;
         }
 
         public int BulletCounter(GameProcess gameProcess)
@@ -135,7 +150,7 @@ namespace ScriptKidAntiCheat.Internal
 
             if (weaponEntity != IntPtr.Zero)
             {
-                return gameProcess.Process.Read<int>(weaponEntity + Offsets.m_iClip1);
+               return gameProcess.Process.Read<int>(weaponEntity + Offsets.m_iClip1);
             }
 
             return 0;
@@ -176,6 +191,8 @@ namespace ScriptKidAntiCheat.Internal
             HasDefuseKit = checkIfHasDefuseKit(gameProcess);
             isAimingDownScope = checkIfAds(gameProcess);
             CanShoot = checkIfCanShoot(gameProcess);
+            CursorLocked = checkIfCursorLocked(gameProcess);
+            Location = getPlayerLocation(gameProcess);
 
             // calc data
             AimDirection = GetAimDirection(ViewAngles, AimPunchAngle);

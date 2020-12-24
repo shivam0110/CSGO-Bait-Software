@@ -1,6 +1,7 @@
 ﻿using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -8,6 +9,10 @@ using static ScriptKidAntiCheat.Utils.MouseHook;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: FlashInYourFace
+     DESCRIPTION: Force cheater to always do short throws with flashbangs and lower their sensitivity temporarily so they cant look away
+    */
     class FlashInYourFace : Punishment
     {
         public bool IsThrowing = false;
@@ -32,7 +37,7 @@ namespace ScriptKidAntiCheat.Punishments
                 CurrentWeapon = ActiveWeapon;
 
                 // If player is holding flashbang or smoke
-                if (CurrentWeapon == Weapons.Flashbang || CurrentWeapon == Weapons.Smoke)
+                if (CurrentWeapon == Weapons.Flashbang) // || CurrentWeapon == Weapons.Smoke
                 {
                     Program.GameConsole.SendCommand("bind mouse1 +attack2");
                 } else
@@ -42,7 +47,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "FlashInYourFaceException1",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
         }
@@ -69,7 +80,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "FlashInYourFaceException2",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 

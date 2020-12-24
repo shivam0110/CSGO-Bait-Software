@@ -1,12 +1,17 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: NoSpray4U
+     DESCRIPTION: Drop the cheaters weapons after spraying for a few bullets
+    */
     class NoSpray4U : Punishment
     {
         public override int ActivateOnRound { get; set; } = 5;
@@ -29,7 +34,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "NoSpray4UException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 

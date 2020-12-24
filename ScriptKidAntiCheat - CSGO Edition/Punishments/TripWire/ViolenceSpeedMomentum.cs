@@ -1,11 +1,16 @@
 ﻿using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: ViolenceSpeedMomentum
+     DESCRIPTION: Give the cheater 100 sensitivity for 15 seconds
+    */
     class ViolenceSpeedMomentum : Punishment
     {
 
@@ -17,7 +22,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "ViolenceSpeedMomentumException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 

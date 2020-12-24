@@ -17,7 +17,7 @@ namespace ScriptKidAntiCheat.Classes.Utils
 
         public static void ResetConfig()
         {
-            if (IsResetting == false)
+            if(IsResetting == false)
             {
                 IsResetting = true;
 
@@ -29,6 +29,7 @@ namespace ScriptKidAntiCheat.Classes.Utils
                         {
                             if (Program.GameProcess.IsValid)
                             {
+                                Program.GameConsole.SendCommand("cl_chatfilters 63");
                                 Program.GameConsole.SendCommand("exec configbackup.cfg; host_writeconfig resetcheck.cfg");
 
                                 Thread.Sleep(2500); // Wait for resetcheck.cfg to be written
@@ -37,15 +38,22 @@ namespace ScriptKidAntiCheat.Classes.Utils
                                 if (configPath != "" && File.Exists(configPath + "resetcheck.cfg"))
                                 {
                                     // Delete and return reset should have been successful at this point
-                                    File.Delete(configPath + "resetcheck.cfg");
                                     IsResetting = false;
+                                    File.Delete(configPath + "resetcheck.cfg");
                                     return;
                                 }
                             }
                         }
                         catch (Exception ex)
                         {
-                            // yeet
+                            Log.AddEntry(new LogEntry()
+                            {
+                                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                                IncludeTimeAndTick = false,
+                                AnalyticsCategory = "Error",
+                                AnalyticsAction = "ResetConfigException",
+                                AnalyticsLabel = ex.Message
+                            });
                         }
 
                         // Try again in 5 seconds if something failed (maybe they we're tab'ed out etc)
@@ -91,7 +99,14 @@ namespace ScriptKidAntiCheat.Classes.Utils
                 }
                 catch (Exception ex)
                 {
-                    // yeet
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        IncludeTimeAndTick = false,
+                        AnalyticsCategory = "Error",
+                        AnalyticsAction = "CreateBackupException",
+                        AnalyticsLabel = ex.Message
+                    });
                 }
 
                 // If we reached this far somethin went wrong, try again in 5 seconds

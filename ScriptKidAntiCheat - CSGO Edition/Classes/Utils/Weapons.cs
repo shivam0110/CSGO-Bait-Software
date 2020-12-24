@@ -5,6 +5,7 @@
     /// </summary>
     public enum Weapons
     {
+        Decoy = 47,
         Flashbang = 43,
         Knife_T = 59,
         Knife_CT = 42,

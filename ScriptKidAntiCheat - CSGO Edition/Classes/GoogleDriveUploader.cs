@@ -9,6 +9,7 @@ using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using ScriptKidAntiCheat.Utils;
+using System.Collections.Generic;
 
 namespace ScriptKidAntiCheat
 {
@@ -47,6 +48,13 @@ namespace ScriptKidAntiCheat
             // Authorize with predefined RefreshToken (RefreshTokens never expire on it's own)
             UserCredential credential = AuthorizeWithRefreshToken(refreshToken);
 
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                AnalyticsCategory = "Replays",
+                AnalyticsAction = "ZipDirectory"
+            });
+
             // Zip directory before uploading to google drive
             string zipFile = ZipDirectory(ReplayFile);
 
@@ -56,11 +64,18 @@ namespace ScriptKidAntiCheat
                 return;
             }
 
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                AnalyticsCategory = "Replays",
+                AnalyticsAction = "ZipDirectorySuccess"
+            });
+
             // Create Drive API service.
             var service = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = "PUBG REPLAY UPLOADER",
+                ApplicationName = "ProjectNeuron",
             });
 
             // File information for google drive
@@ -71,6 +86,13 @@ namespace ScriptKidAntiCheat
             };
 
             FilesResource.CreateMediaUpload request;
+
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                AnalyticsCategory = "Replays",
+                AnalyticsAction = "UploadStart"
+            });
 
             // Do the actual file upload to google drive
             using (var stream = new System.IO.FileStream(zipFile, System.IO.FileMode.Open))
@@ -85,13 +107,33 @@ namespace ScriptKidAntiCheat
 
             if(Program.Debug.ShowDebugMessages)
             {
-                if (file.Id.Length > 0)
+                if (file != null && file.Id.Length > 0)
                 {
                     System.Windows.Forms.MessageBox.Show("Upload complete", "Debug", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
                 }
                 else
                 {
                     System.Windows.Forms.MessageBox.Show("Upload failed", "Debug", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Warning);
+                }
+            } else
+            {
+                if (file != null && file.Id.Length > 0)
+                {
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "Replays",
+                        AnalyticsAction = "UploadSuccess"
+                    });
+                }
+                else
+                {
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "Replays",
+                        AnalyticsAction = "UploadFail"
+                    });
                 }
             }
 
@@ -149,6 +191,7 @@ namespace ScriptKidAntiCheat
             string cleanReplayName = ReplayFile.Name.Replace("#sheeter", "");
             string replayTmpDirPath = Path.GetTempPath() + cleanReplayName;
             string logFilePath = ReplayFile.DirectoryName + @"\" + Path.GetFileNameWithoutExtension(ReplayFile.FullName) + ".log";
+            string manifestFilePath = ReplayFile.DirectoryName + @"\" + Path.GetFileNameWithoutExtension(ReplayFile.FullName) + ".manifest.log";
 
             // Create temporary dir where we will place replay file
             Directory.CreateDirectory(replayTmpDirPath);
@@ -159,6 +202,14 @@ namespace ScriptKidAntiCheat
                 FileInfo ReplayLogFile = new FileInfo(logFilePath);
                 string cleanLogFileName = ReplayLogFile.Name.Replace("#sheeter", "");
                 ReplayLogFile.MoveTo(replayTmpDirPath + @"\" + cleanLogFileName);
+            }
+
+            // Move Replay manifest if it exists
+            if (File.Exists(manifestFilePath))
+            {
+                FileInfo ReplayManifestFile = new FileInfo(manifestFilePath);
+                string cleanManifestFileName = ReplayManifestFile.Name.Replace("#sheeter", "");
+                ReplayManifestFile.MoveTo(replayTmpDirPath + @"\" + cleanManifestFileName);
             }
 
             // Move replay file to tmp dir

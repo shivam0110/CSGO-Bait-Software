@@ -3,6 +3,7 @@ using Gma.System.MouseKeyHook.Implementation;
 using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -10,6 +11,10 @@ using System.Windows.Forms;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: ReverseSpeedhack
+     DESCRIPTION: Make the cheater move extremly slowly for 20 seconds
+    */
     class ReverseSpeedhack : Punishment
     {
         private bool slowmode_activated = false;
@@ -21,7 +26,11 @@ namespace ScriptKidAntiCheat.Punishments
 
         public ReverseSpeedhack() : base(20000, true, 100)
         {
-            ReplayLogger.Log(this.GetType().Name);
+            LogEntry Entry = new LogEntry();
+            Entry.LogTypes.Add(LogTypes.Replay);
+            Entry.LogMessage = this.GetType().Name;
+            Log.AddEntry(Entry);
+
             Program.m_GlobalHook.KeyDown += GlobalHookKeyDown;
             Program.m_GlobalHook.KeyUp += GlobalHookKeyUp;
         }
@@ -124,7 +133,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "ReverseSpeedHackException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -133,6 +148,8 @@ namespace ScriptKidAntiCheat.Punishments
             if (base.CanActivate() == false) return;
 
             slowmode_activated = true;
+
+            Program.FakeCheat.DisableCSGOESCMenu = true;
 
             Program.GameConsole.SendCommand("sensitivity 0.2");
 
@@ -144,6 +161,7 @@ namespace ScriptKidAntiCheat.Punishments
             slowmode_activated = false;
             Program.m_GlobalHook.KeyDown -= GlobalHookKeyDown;
             Program.m_GlobalHook.KeyUp -= GlobalHookKeyUp;
+            Program.FakeCheat.DisableCSGOESCMenu = false;
             PlayerConfig.ResetConfig();
         }
 

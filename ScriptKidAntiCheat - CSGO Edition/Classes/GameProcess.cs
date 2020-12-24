@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 
 /*
  * Credit: https://github.com/rciworks/RCi.Tutorials.Csgo.Cheat.External
@@ -49,7 +50,9 @@ namespace ScriptKidAntiCheat.Data
                 InvalidateModules();
             }
 
-            if (!EnsureWindow())
+            WindowActive = EnsureWindow();
+
+            if (!WindowActive)
             {
                 InvalidateWindow();
             }
@@ -80,14 +83,10 @@ namespace ScriptKidAntiCheat.Data
             {
                 Process = Process.GetProcessesByName(NAME_PROCESS).FirstOrDefault();
             }
+
             if (Process is null || !Process.IsRunning())
             {
                 return false;
-            }
-            if(Process.IsRunning() && !GameConsole.cfgIsReady)
-            {
-                Process.Kill();
-                Program.GameConsole.checkIfCfgIsReady();
             }
 
             if (ModuleClient is null)
@@ -134,9 +133,20 @@ namespace ScriptKidAntiCheat.Data
                 return false;
             }
 
-            WindowActive = WindowHwnd == User32.GetForegroundWindow();
+            if(WindowHwnd == User32.GetForegroundWindow())
+            {
+                return true;
+            }
 
-            return WindowActive;
+            /* Some wierd windows bug causes the GetForegroundWindow to not work if
+             * the computer goes into idle if you are afk for to long. This is backup check that seems to solve it
+             */
+            if (Helper.GetActiveWindowTitle() == "Counter-Strike: Global Offensive")
+            {
+                return true;
+            }
+
+            return false;
         }
 
     }

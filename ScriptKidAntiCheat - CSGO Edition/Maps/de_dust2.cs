@@ -28,7 +28,7 @@ namespace ScriptKidAntiCheat
                     x3 = -519, y3 = 2302,
                     x4 = -517, y4 = 1965,
                     z = 0
-                }, 100, Team.CounterTerrorists, 50
+                }, 50, Team.CounterTerrorists, 50
             );
             ct_mid.OnTriggered += RushMid;
             TripWires.Add(ct_mid);

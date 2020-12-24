@@ -62,20 +62,6 @@ namespace ScriptKidAntiCheat
             // Set version number
             label5.Text = label5.Text + " " + Program.version;
 
-            // Quick buttons
-            Program.m_GlobalHook.OnCombination(new Dictionary<Combination, Action>
-            {
-                {Combination.FromString("F5"), () => { 
-                    if(!Program.FakeCheat.InDemo)
-                    {
-                        Program.FakeCheat.InDemo = true;
-                    } else
-                    {
-                        Program.FakeCheat.InDemo = false;
-                    }
-                 }},
-            });
-
             label1.BringToFront();
 
 
@@ -153,11 +139,23 @@ namespace ScriptKidAntiCheat
             {
                 if (!Program.GameData.MatchInfo.IsMatchmaking && !Program.Debug.AllowLocal)
                 {
+                    Log.AddEntry(new LogEntry()
+                    {
+                        LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                        AnalyticsCategory = "InjectButton",
+                        AnalyticsAction = "NotInMatchmaking"
+                    });
                     MessageBox.Show("You need to join a matchmaking game before injecting.", "No match in progress", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 }
             }
             else
             {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "InjectButton",
+                    AnalyticsAction = "NotRunningCSGO"
+                });
                 MessageBox.Show("CSGO is not running!", "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
         }

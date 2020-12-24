@@ -1,8 +1,13 @@
 ﻿using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: NoCrosshairChallenge
+     DESCRIPTION: Remove the crosshair for 20 seconds
+    */
     class NoCrosshairChallenge : Punishment
     {
 
@@ -14,7 +19,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "NoCrosshairChallengeException",
+                    AnalyticsLabel = ex.Message
+                });
             }
             
         }

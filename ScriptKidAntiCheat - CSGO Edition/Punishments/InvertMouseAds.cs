@@ -1,9 +1,14 @@
 ﻿using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: InvertMouseAds
+     DESCRIPTION: Reverse mouse while ADS
+    */
     class InvertMouseAds : Punishment
     {
         public bool InvertActivated = false;
@@ -37,7 +42,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "InvertMouseAdsException",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 

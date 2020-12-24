@@ -4,8 +4,11 @@ using ScriptKidAntiCheat.Utils.Maths;
 using ScriptKidAntiCheat.Win32;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,6 +58,34 @@ namespace ScriptKidAntiCheat.Utils
             return false;
         }
 
+        public static bool PlayerIsInSpawn()
+        {
+            if (!Program.GameProcess.IsValid || Program.FakeCheat.ActiveMapClass == null || !Program.GameData.Player.IsAlive()) return false;
+
+            Team PlayerTeam = Program.GameData.Player.Team;
+            string PlayerLocation = Program.GameData.Player.Location.ToLower();
+            string Map = Program.FakeCheat.ActiveMapClass.GetType().Name;
+
+            if (PlayerTeam == Team.Terrorists && PlayerLocation.Contains("tspawn"))
+            {
+                return true;
+            }
+
+            if (PlayerTeam == Team.CounterTerrorists && PlayerLocation.Contains("ctspawn"))
+            {
+                return true;
+            }
+
+            string SpawnLocation = Program.GameData.MatchInfo.SpawnLocationName;
+
+            if (SpawnLocation != "" && SpawnLocation.ToLower() == PlayerLocation)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static System.Drawing.Rectangle GetClientRectangle(IntPtr handle)
         {
             return User32.ClientToScreen(handle, out var point) && User32.GetClientRect(handle, out var rect)
@@ -92,6 +123,7 @@ namespace ScriptKidAntiCheat.Utils
                     MeasureAnglePerPixel(300),
                     MeasureAnglePerPixel(-400),
                     MeasureAnglePerPixel(200),
+                    MeasureAnglePerPixel(-300)
                 }.Average();
 
                 MouseIsCalibrated = true;
@@ -100,6 +132,14 @@ namespace ScriptKidAntiCheat.Utils
             }
             catch (Exception ex)
             {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "MeasureAnglePerPixelException",
+                    AnalyticsLabel = ex.Message
+                });
                 return false;
             }
 
@@ -123,7 +163,7 @@ namespace ScriptKidAntiCheat.Utils
             eyeEnd.Z = 0;
 
             // Return calibration
-            if (eyeStart.X == eyeEnd.X)
+            if(eyeStart.X == eyeEnd.X)
             {
                 throw new Exception("Calibration failed");
             }
@@ -158,15 +198,29 @@ namespace ScriptKidAntiCheat.Utils
 
         public static void SetViewAngleToWorldPoint(Vector3 WorldPoint)
         {
-            Vector2 DesiredViewAngle = new Vector2();
-            Vector2 aimPixels = new Vector2();
-            int MoveMouseX1, MoveMouseY1, MoveMouseX2, MoveMouseY2;
+            try
+            {
+                Vector2 DesiredViewAngle = new Vector2();
+                Vector2 aimPixels = new Vector2();
+                int MoveMouseX1, MoveMouseY1, MoveMouseX2, MoveMouseY2;
 
-            DesiredViewAngle = Helper.GetAimAngles(WorldPoint);
-            aimPixels = Helper.GetAimPixels(DesiredViewAngle);
-            MoveMouseX1 = (int)Math.Round(aimPixels.X);
-            MoveMouseY1 = (int)Math.Round(aimPixels.Y);
-            SendInput.MouseMove(MoveMouseX1, MoveMouseY1);
+                DesiredViewAngle = Helper.GetAimAngles(WorldPoint);
+                aimPixels = Helper.GetAimPixels(DesiredViewAngle);
+                MoveMouseX1 = (int)Math.Round(aimPixels.X);
+                MoveMouseY1 = (int)Math.Round(aimPixels.Y);
+                SendInput.MouseMove(MoveMouseX1, MoveMouseY1);
+            }
+            catch (Exception ex)
+            {
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "SetViewAngleToWorldPointException",
+                    AnalyticsLabel = ex.Message
+                });
+            }
         }
 
         public static void AimLock(Vector3 WorldPoint, int LockTime = 1000, Vector3 WorldPointAfter = default)
@@ -183,7 +237,7 @@ namespace ScriptKidAntiCheat.Utils
 
                     x++;
                     // Keep locking aim to target every xx ms
-                    if (x >= 10)
+                    if(x >= 10)
                     {
                         SetViewAngleToWorldPoint(WorldPoint);
                         x = 0;
@@ -195,10 +249,47 @@ namespace ScriptKidAntiCheat.Utils
                     if (elapsedMillisecs > LockTime)
                     {
                         // Optional set ViewAngle to something else after lock released (etc used can be used for resetting)
-                        if (WorldPointAfter != default)
+                        if(WorldPointAfter != default)
                         {
                             SetViewAngleToWorldPoint(WorldPointAfter);
                         }
+                        break;
+                    }
+                }
+            });
+        }
+
+        public static void AimLock(Entity Entity, int BonePos = 0, int LockTime = 1000)
+        {
+            Task.Run(() => {
+                DateTime startTime, endTime;
+                startTime = DateTime.Now;
+                int x = 0;
+                //Vector2 reset = new Vector2(Program.GameData.Player.ViewAngles.X, Program.GameData.Player.ViewAngles.Y);
+                Vector3 reset = Program.GameData.Player.EyePosition;
+                while (true)
+                {
+                    Thread.Sleep(1);
+
+                    x++;
+                    // Keep locking aim to target every xx ms
+                    if (x >= 10)
+                    {
+                        if(Entity != null && Entity.BonesPos != null && Entity.BonesPos.Length >= BonePos)
+                        {
+                            if(Entity.BonesPos[BonePos] != null)
+                            {
+                                SetViewAngleToWorldPoint(Entity.BonesPos[BonePos]);
+                            }
+                        }
+                        x = 0;
+                    }
+
+                    // Cancel after lock time elpased
+                    endTime = DateTime.Now;
+                    Double elapsedMillisecs = ((TimeSpan)(endTime - startTime)).TotalMilliseconds;
+                    if (elapsedMillisecs > LockTime)
+                    {
                         break;
                     }
                 }
@@ -226,7 +317,7 @@ namespace ScriptKidAntiCheat.Utils
 
         public static string getPathToCSGO()
         {
-            if (PathToCSGO != null)
+            if(PathToCSGO != null)
             {
                 return PathToCSGO;
             }
@@ -275,23 +366,35 @@ namespace ScriptKidAntiCheat.Utils
             }
             catch (Exception ex)
             {
-
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    IncludeTimeAndTick = false,
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "getPathToCSGOException",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
             // Try find manually
             var csgo_32 = Environment.GetEnvironmentVariable("ProgramFiles(x86)") + @"\Steam\steamapps\common\Counter-Strike Global Offensive\csgo";
             var csgo_64 = Environment.GetEnvironmentVariable("ProgramFiles") + @"\Steam\steamapps\common\Counter-Strike Global Offensive\csgo";
 
-            if (Directory.Exists(csgo_64))
-            {
+            if (Directory.Exists(csgo_64)) {
                 PathToCSGO = csgo_64;
                 return PathToCSGO;
-            }
-            else if (Directory.Exists(csgo_32))
+            } else if(Directory.Exists(csgo_32))
             {
                 PathToCSGO = csgo_32;
                 return PathToCSGO;
             }
+
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                AnalyticsCategory = "Error",
+                AnalyticsAction = "CouldNotFindCSGOPath"
+            });
 
             return "";
         }
@@ -332,67 +435,42 @@ namespace ScriptKidAntiCheat.Utils
                 return PathToSteam;
             }
 
+            Log.AddEntry(new LogEntry()
+            {
+                LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                AnalyticsCategory = "Error",
+                AnalyticsAction = "CouldNotFindSteamPath"
+            });
+
             return "";
         }
 
-        public static string PlayerNickname;
-
-        public static string getPlayerNickname()
+        public static int IntersectsHitBox(Line3D aimRayWorld, Entity entity, float offset = 1)
         {
-            if (PlayerNickname != null)
+            for (var hitBoxId = 0; hitBoxId < entity.StudioHitBoxSet.numhitboxes; hitBoxId++)
             {
-                return PlayerNickname;
-            }
-
-            var SteamPath = getPathToSteam();
-            if (SteamPath != "")
-            {
-                if (Directory.Exists(SteamPath + @"\userdata"))
+                var hitBox = entity.StudioHitBoxes[hitBoxId];
+                var boneId = hitBox.bone;
+                if (boneId < 0 || boneId > Helper.MaxStudioBones || hitBox.radius <= 0)
                 {
-                    string newestConfig = "";
-                    DateTime lastModified = default;
-                    string[] users = Directory.GetDirectories(SteamPath + @"\userdata");
-                    foreach (string user in users)
-                    {
-                        string configPath = user + @"\730\local\cfg\config.cfg";
-                        if (File.Exists(configPath))
-                        {
-                            DateTime configLastModified = File.GetLastWriteTime(configPath);
-                            if (lastModified == default || lastModified < configLastModified)
-                            {
-                                lastModified = configLastModified;
-                                newestConfig = configPath;
-                            }
-                        }
-                    }
+                    continue;
+                }
 
-                    if (newestConfig != "")
-                    {
-                        try
-                        {
-                            string readText = File.ReadAllText(newestConfig);
-
-                            var match = Regex.Match(readText, "(?<=^name\\s\").*(?=\")", RegexOptions.Multiline);
-
-                            if (!match.Success || match.Value.Length < 4)
-                            {
-                                return "Sheeter";
-                            }
-
-                            // Hide full nickname
-                            PlayerNickname = match.Value.Substring(0, match.Value.Length - 3) + "---";
-
-                            return PlayerNickname;
-                        }
-                        catch (IOException e)
-                        {
-
-                        }
-                    }
+                // intersect capsule
+                var matrixBoneModelToWorld = entity.BonesMatrices[boneId];
+                var boneStartWorld = matrixBoneModelToWorld.Transform(hitBox.bbmin);
+                var boneEndWorld = matrixBoneModelToWorld.Transform(hitBox.bbmax);
+                var boneWorld = new Line3D(boneStartWorld, boneEndWorld);
+                var (p0, p1) = aimRayWorld.ClosestPointsBetween(boneWorld, true);
+                var distance = (p1 - p0).Length();
+                if (distance < hitBox.radius * offset)
+                {
+                    // intersects
+                    return hitBoxId;
                 }
             }
 
-            return "Sheeter";
+            return -1;
         }
 
         public static int pointerI = 0;
@@ -452,6 +530,39 @@ namespace ScriptKidAntiCheat.Utils
             }
 
         }
+        public static string MD5Hash(string input)
+        {
+            StringBuilder hash = new StringBuilder();
+            MD5CryptoServiceProvider md5provider = new MD5CryptoServiceProvider();
+            byte[] bytes = md5provider.ComputeHash(new UTF8Encoding().GetBytes(input));
 
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                hash.Append(bytes[i].ToString("x2"));
+            }
+            return hash.ToString();
+        }
+
+        public static float GetCurrentTick()
+        {
+            if(Program.FakeCheat.ReplayMonitor.RecordingStarted == 0) return 0;
+            float TickRate = 1.0f / Program.GameData.MatchInfo.GlobalVars.interval_per_tick;
+            long CurrentTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+            float CurrentTick = (CurrentTime - Program.FakeCheat.ReplayMonitor.RecordingStarted) * TickRate;
+            return CurrentTick - Math.Max(TickRate * 5, 0); // Make sure our tick count in the log is 5 seconds before the actual event
+        }
+
+        public static string GetActiveWindowTitle()
+        {
+            const int nChars = 256;
+            StringBuilder Buff = new StringBuilder(nChars);
+            IntPtr handle = User32.GetForegroundWindow();
+
+            if (User32.GetWindowText(handle, Buff, nChars) > 0)
+            {
+                return Buff.ToString();
+            }
+            return null;
+        }
     }
 }

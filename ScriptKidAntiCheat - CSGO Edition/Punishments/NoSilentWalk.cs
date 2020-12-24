@@ -1,20 +1,30 @@
 ﻿using ScriptKidAntiCheat.Classes;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: NoSilentWalk
+     DESCRIPTION: When the cheater is last alive and sneaking (walking) for over 10 seconds it will play taser or knife sound to scare him
+    */
     class NoSilentWalk : Punishment
     {
         private static System.Timers.Timer punishmentTimer;
 
-        public NoSilentWalk() : base(0) // 0 = Always active
+        private bool HasPlayedZeusSoundThisRound = false;
+
+        private bool HasPlayedKnifeSoundThisRound = false;
+        public override bool DisposeOnReset { get; set; } = false;
+
+        public NoSilentWalk() : base(0, true) // 0 = Always active
         {
-            // If player walks for more than 10 seconds lets trigger punishment
-            punishmentTimer = new System.Timers.Timer(10000); 
+            // If player walks for more than 7 seconds lets trigger punishment
+            punishmentTimer = new System.Timers.Timer(7000); 
             punishmentTimer.Elapsed += delayedPunishment;
             punishmentTimer.AutoReset = false;
             punishmentTimer.Enabled = false;
@@ -24,6 +34,8 @@ namespace ScriptKidAntiCheat.Punishments
         {
             try
             {
+                Weapons ActiveWeapon = (Weapons)Player.ActiveWeapon;
+
                 if (Player.vecVelocity.X < 150 &&
                     Player.vecVelocity.X > -150 &&
                     Player.vecVelocity.X != 0 &&
@@ -43,7 +55,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "NoSilentWalkException",
+                    AnalyticsLabel = ex.Message
+                });
             }
             
         }
@@ -52,11 +70,37 @@ namespace ScriptKidAntiCheat.Punishments
         {
             if (base.CanActivate() == false) return;
 
-            SendInput.MouseLeftDown();
-            Thread.Sleep(100);
-            SendInput.MouseLeftUp();
+            if (HasPlayedZeusSoundThisRound && HasPlayedKnifeSoundThisRound) return;
 
-            base.AfterActivate();
+            Task.Run(() =>
+            {
+
+                if (!HasPlayedZeusSoundThisRound)
+                {
+                    Program.GameConsole.SendCommand(@"play player/footsteps/new/land_tile_01.wav");
+                    Thread.Sleep(500);
+                    Program.GameConsole.SendCommand(@"play weapons\taser\taser_shoot");
+                    HasPlayedZeusSoundThisRound = true;
+                }
+                else if(!HasPlayedKnifeSoundThisRound)
+                {
+                    Program.GameConsole.SendCommand(@"play weapons/knife/knife_deploy1.wav");
+                    Thread.Sleep(500);
+                    Program.GameConsole.SendCommand(@"play player/footsteps/new/land_tile_01.wav");
+                    Thread.Sleep(200);
+                    Program.GameConsole.SendCommand(@"play weapons/knife/knife_slash2.wav");
+                    HasPlayedKnifeSoundThisRound = true;
+                }
+
+                base.AfterActivate();
+            });
+
+        }
+
+        override public void Reset()
+        {
+            HasPlayedKnifeSoundThisRound = false;
+            HasPlayedZeusSoundThisRound = false;
         }
 
     }

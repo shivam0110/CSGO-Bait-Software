@@ -12,6 +12,10 @@ using ScriptKidAntiCheat.Classes.Utils;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: KnockKnockWhosThere
+     DESCRIPTION: Unbind "e" key while near any doors and if they try to open the door play realistic knocking sound
+    */
     class KnockKnockWhosThere : Punishment
     {
         public TripWire triggeringTripWire;
@@ -40,7 +44,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "KnockKnockWhosThereException1",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -55,7 +65,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "KnockKnockWhosThereException2",
+                    AnalyticsLabel = ex.Message
+                });
             }
 
         }

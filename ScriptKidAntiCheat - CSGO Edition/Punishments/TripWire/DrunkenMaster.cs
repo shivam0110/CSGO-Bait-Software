@@ -2,12 +2,17 @@
 using ScriptKidAntiCheat.Classes.Utils;
 using ScriptKidAntiCheat.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ScriptKidAntiCheat.Punishments
 {
+    /*
+     PUNISHMENT: DrunkenMaster
+     DESCRIPTION: Randomize movement keys for 15 seconds
+    */
     class DrunkenMaster : Punishment
     {
 
@@ -26,7 +31,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "DrunkenMasterException1",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -64,7 +75,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "DrunkenMasterException2",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -81,7 +98,13 @@ namespace ScriptKidAntiCheat.Punishments
             }
             catch (Exception ex)
             {
-                // yeet
+                Log.AddEntry(new LogEntry()
+                {
+                    LogTypes = new List<LogTypes> { LogTypes.Analytics },
+                    AnalyticsCategory = "Error",
+                    AnalyticsAction = "DrunkenMasterException3",
+                    AnalyticsLabel = ex.Message
+                });
             }
         }
 
@@ -96,7 +119,8 @@ namespace ScriptKidAntiCheat.Punishments
 
         override public void Reset()
         {
-           
+            Program.m_GlobalHook.KeyDown -= GlobalHookKeyDown;
+            Program.m_GlobalHook.KeyUp -= GlobalHookKeyUp;
             Program.GameConsole.SendCommand("-forward; -back; -moveleft; -moveright");
         }
 
