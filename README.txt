@@ -1,4 +1,4 @@
-CSGO bait software made by ScriptKid, imported it from url: https://gitlab.com/scriptkid/csgo-fake-cheat-public/
+CSGO bait software made by ScriptKid in C# language, I have imported it from url: https://gitlab.com/scriptkid/csgo-fake-cheat-public/
 
 GLHF
 
