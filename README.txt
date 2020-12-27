@@ -1,3 +1,9 @@
+CSGO bait software made by ScriptKid, imported it from url: https://gitlab.com/scriptkid/csgo-fake-cheat-public/
+
+GLHF
+
+///////////////////////////////////////////////////////////////////
+
 Hi! :)
 
 Read this document if you want to understand how everything works.
